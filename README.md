@@ -1,6 +1,29 @@
 # MLPApproximator
 Research how number of perceptrons against of it quality. Backward error propagation. 
 
+## Requirements [PL]
+Projekt jest rozliczany na podstawie:
+ * raportu wstępnego (0 - 6 pkt.)
+ * rozliczenia końcowego (0 - 24 pkt.)
+
+Próg punktowy wymagany dla zaliczenia projektu i terminy rozliczania obu jego części podane są w regulaminie przedmiotu. Projekt rozliczany jest poprzez platformę kursy.okno.pw.edu.pl (zakładki: „Raport wstępny”, „Projekt końcowy”). W raporcie wstępnym należy:
+  1. Przedstawić zadaną metodykę lub algorytm Sztucznej Inteligencji (w tym podać dokładny pseudokod algorytmu i skomentować go własnymi słowami);
+  2. Przedstawić koncepcję rozwiązania zadanego problemu z wykorzystaniem metodyki lub algorytmu Sztucznej Inteligencji (w tym wyrazić zadany problem w sposób wymagany przez wybraną metodykę Szt. Int. – format danych, wymagane funkcje - i zdefiniować w pseudo-kodzie interfejs pomiędzy reprezentacją problemu a metodyką). W rozliczeniu końcowym projektu należy:
+  3. Przekazać raport końcowy zawierający:
+    * poprawiony i uaktualniony raport wstępny (pkt. A, B),
+    * opis struktury i funkcji zrealizowanego programu,
+    * sposób uruchomienia programu,
+    * podsumować wykonane testy i przedstawić wnioski.
+  4. Przekazać program i jego źródła (kody programu) oraz przykładowy plik monitorujący wykonanie programu. Program może wykonywać się w trybie wsadowym („batch”) –  nie jest wymagany graficzny interfejs użytkownika (za wyjątkiem wizualizacji wyników w niektórych projektach typu N). W typowym rozwiązaniu program posiada możliwość zadawania argumentów w linii wywołania, wczytuje dane z przygotowanych plików i zapisuje uzyskiwane wyniki w pliku monitorującym jego wykonanie a także w oknie wykonania programu
+
+Część N (uczenie sieci neuronowej)
+Projekt N1. MLP – aproksymacja funkcji. Wykonać program do badania wpływu ilości neuronów perceptronu na jakość aproksymacji w sieciach neuronowych typu MLP uczonych algorytmem wstecznej propagacji błędu.
+ 1. Zaimplementować algorytm działania sieci MLP (aproksymacji nauczonej funkcji) i algorytm uczenia tej sieci.
+ 2. Wygenerować dane uczące i dane testujące – przyjąć 3 nieliniowe funkcje Margumentowe (M=3, 5, 7).
+ 3. Przewidzieć możliwość aproksymacji zbioru funkcji za pomocą sieci neuronowej MLP o M wejściach, 3 wyjściach oraz jednej warstwie ukrytej (o zmiennej liczbie neuronów N od N=M do N = 10M).
+ 4. Sprawdzić działanie procedury uczenia sieci i procedury aproksymacji funkcji – zmieniać liczbę neuronów w warstwie ukrytej, warunki początkowe i liczbę iteracji procesu uczenia (I od I=100 do 1000).
+ 5. Wynik ma postać zależności uzyskanych wyników aproksymacji trzech funkcji (średniego błędu aproksymacji każdej z funkcji w zadanym przedziale wartości argumentów) od parametrów M i N oraz liczby iteracji I
+
 ## Getting Started
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
