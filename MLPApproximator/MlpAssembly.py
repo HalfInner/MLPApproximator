@@ -25,13 +25,13 @@ class Perceptron:
         self.__activation_function = activation_function
 
         self.__weights = np.ones([input_number, output_number], dtype=float).reshape([3, 2])
+        self.__weights[0][1] = -1
+        self.__weights[2][0] = -1
         self.__output_data = np.zeros_like(self.__weights)
 
     def forwardPropagation(self, input_data) -> np.array:
         raw_output = self.__weights @ input_data
-        for el in raw_output:
-            el = self.__activation_function(el)
-        self.__output_data = raw_output
+        self.__output_data = self.__activation_function(raw_output)
 
     def output(self) -> np.array:
         return self.__output_data
@@ -40,6 +40,7 @@ class Perceptron:
 class MlpApproximator:
     def run(self) -> str:
         p1 = Perceptron(2, 3)
-        p1.forwardPropagation(np.array([1, 2]).reshape((2, 1)))
+        first_sample = np.array([1, 2]).reshape((2, 1))
+        p1.forwardPropagation(first_sample)
         print('Out: \n', p1.output())
         return 0
