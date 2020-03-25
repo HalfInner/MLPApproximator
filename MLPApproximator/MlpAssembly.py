@@ -1,5 +1,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import sys
 from datetime import time
 
 import numpy as np
@@ -42,12 +43,26 @@ class Perceptron:
 
         return self
 
+    def meanSquaredError(self, expected_out):
+        if not expected_out.shape == self.__output_data.shape:
+            raise ValueError("Shape of validator must be same as the output")
+        el1 = expected_out - self.__output_data
+        el2 = np.ones([self.__output_number, 1]) - self.__output_data
+        el3 = self.__output_data
+
+        mean_squared_error = el1 * el2 * el3
+        return mean_squared_error
+
+    def backwardPropagation(self, validate_out):
+        pass
+
     def output(self) -> np.array:
         return self.__output_data
 
 
 class MlpApproximator:
     def run(self) -> str:
+        # sample: x=(1,2); output: f(x) = (1, 0).
         p1 = Perceptron(2, 3)
         p2 = Perceptron(3, 2, test_first_p1=False)
 
@@ -57,4 +72,9 @@ class MlpApproximator:
 
         print('Out1: \n', p1.output())
         print('Out2: \n', p2.output())
+
+        expected_out = np.array([1, 0]).reshape((2, 1))
+        p2_error = p2.meanSquaredError(expected_out)
+        print('P2: mean error \n', p2_error)
+
         return 0
