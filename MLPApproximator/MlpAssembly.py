@@ -19,19 +19,28 @@ class SigmoidActivationFunction:
 
 class Perceptron:
 
-    def __init__(self, input_number, output_number, activation_function=SigmoidActivationFunction()) -> None:
+    def __init__(self, input_number, output_number, activation_function=SigmoidActivationFunction(),
+                 test_first_p1=True) -> None:
         self.__input_number = input_number
         self.__output_number = output_number
         self.__activation_function = activation_function
 
-        self.__weights = np.ones([input_number, output_number], dtype=float).reshape([3, 2])
-        self.__weights[0][1] = -1
-        self.__weights[2][0] = -1
+        self.__weights = np.ones((output_number, input_number), dtype=float)
+        if test_first_p1:
+            self.__weights[0][1] = -1
+            self.__weights[2][0] = -1
+        else:
+            self.__weights[0][1] = -1
+            self.__weights[1][0] = -1
+            self.__weights[1][2] = -1
+
         self.__output_data = np.zeros_like(self.__weights)
 
-    def forwardPropagation(self, input_data) -> np.array:
+    def forwardPropagation(self, input_data):
         raw_output = self.__weights @ input_data
         self.__output_data = self.__activation_function(raw_output)
+
+        return self
 
     def output(self) -> np.array:
         return self.__output_data
@@ -40,7 +49,12 @@ class Perceptron:
 class MlpApproximator:
     def run(self) -> str:
         p1 = Perceptron(2, 3)
+        p2 = Perceptron(3, 2, test_first_p1=False)
+
         first_sample = np.array([1, 2]).reshape((2, 1))
-        p1.forwardPropagation(first_sample)
-        print('Out: \n', p1.output())
+        p1_out = p1.forwardPropagation(first_sample).output()
+        p2.forwardPropagation(p1_out)
+
+        print('Out1: \n', p1.output())
+        print('Out2: \n', p2.output())
         return 0
