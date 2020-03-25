@@ -61,20 +61,29 @@ class Perceptron:
 
 
 class MlpApproximator:
+
+    def __init__(self, input_number, output_number, hidden_layer_number=3):
+        self.__input_number = input_number
+        self.__output_number = output_number
+        self.__p1 = Perceptron(input_number, hidden_layer_number)
+        self.__p2 = Perceptron(hidden_layer_number, output_number, test_first_p1=False)
+
+    def forwardPropagation(self, input_data):
+        self.__p2.forwardPropagation(self.__p1.forwardPropagation(input_data).output())
+
+    def doWeirdStuff(self, output_data):
+        self__mean_square_error = self.__p2.meanSquaredError(output_data)
+        print('P2: mean error \n', self__mean_square_error)
+
+
+class MlpApproximatorTester:
     def run(self) -> str:
         # sample: x=(1,2); output: f(x) = (1, 0).
-        p1 = Perceptron(2, 3)
-        p2 = Perceptron(3, 2, test_first_p1=False)
-
         first_sample = np.array([1, 2]).reshape((2, 1))
-        p1_out = p1.forwardPropagation(first_sample).output()
-        p2.forwardPropagation(p1_out)
-
-        print('Out1: \n', p1.output())
-        print('Out2: \n', p2.output())
-
         expected_out = np.array([1, 0]).reshape((2, 1))
-        p2_error = p2.meanSquaredError(expected_out)
-        print('P2: mean error \n', p2_error)
+
+        mlp_approximator = MlpApproximator(2, 2)
+        mlp_approximator.forwardPropagation(first_sample)
+        mlp_approximator.doWeirdStuff(expected_out)
 
         return 0
