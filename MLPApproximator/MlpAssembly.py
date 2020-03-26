@@ -6,6 +6,28 @@ import numpy as np
 from MLPApproximator.MlpApproximator import MlpApproximator
 
 
+class TestingSet:
+
+    def __init__(self, set) -> None:
+        self.__set = set
+
+    @property
+    def X(self):
+        return self.__set[0]
+
+    @property
+    def Y(self):
+        return self.__set[1]
+
+    @property
+    def Input(self):
+        return self.__set[0]
+
+    @property
+    def Output(self):
+        return self.__set[1]
+
+
 class FunctionGenerator:
 
     def __init__(self) -> None:
@@ -20,8 +42,17 @@ class FunctionGenerator:
         """
         self.__function_store.append(polynomial)
 
-    def generate(self, samples_number):
-        pass
+    def generate(self, samples_number=1):
+        input_set = np.zeros([samples_number, len(self.__function_store)], dtype=float)
+        output_set = np.zeros([samples_number, len(self.__function_store)], dtype=float)
+
+        for x in range(samples_number):
+            for idx, polynomial in enumerate(self.__function_store):
+                value = sum([factor * x ** step for step, factor in enumerate(reversed(polynomial))])
+                input_set[idx][x] = x
+                output_set[idx][x] = value
+
+        return TestingSet([input_set, output_set])
 
     def to_string(self):
         output_str = ""
