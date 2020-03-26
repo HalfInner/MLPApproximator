@@ -7,6 +7,9 @@ from MLPApproximator.MlpActivationFunction import SigmoidActivationFunction
 
 
 class Perceptron:
+    """
+    Perceptron must be controlled by upper layer
+    """
 
     def __init__(self, input_number, output_number, activation_function=SigmoidActivationFunction(),
                  test_first_p1=True) -> None:
@@ -28,6 +31,9 @@ class Perceptron:
         self.__input_data = None
 
     def train(self):
+        """
+        Train the perceptron.
+        """
         if self.__input_data is None:
             raise RuntimeError('Cannot proceed train without input')
         delta = 0.1 * self.__mean_squared_error @ self.__input_data.transpose()
@@ -35,9 +41,20 @@ class Perceptron:
         print('Weights \n', self.__weights)
 
     def weights(self):
+        """
+        Might be converted to private
+
+        :return:
+        """
         return self.__weights
 
     def forwardPropagation(self, input_data):
+        """
+        Might be converted to private
+
+        :param input_data:
+        :return:
+        """
         self.__input_data = input_data
         raw_output = self.__weights @ self.__input_data
         self.__output_data = self.__activation_function(raw_output)
@@ -45,6 +62,12 @@ class Perceptron:
         return self
 
     def meanSquaredErrorOutput(self, expected_out):
+        """
+        Might be converted to private
+
+        :param expected_out:
+        :return:
+        """
         if not expected_out.shape == self.__output_data.shape:
             raise ValueError("Shape of validator must be same as the output")
         step1 = expected_out - self.__output_data
@@ -55,6 +78,12 @@ class Perceptron:
         return self.__mean_squared_error
 
     def meanSquaredErrorHidden(self, next_weight, next_mean_squared_error):
+        """
+        Might be converted to private
+        :param next_weight:
+        :param next_mean_squared_error:
+        :return:
+        """
         print('Next Weight \n', next_weight)
         print('next_mean_squared_error \n', next_mean_squared_error)
         # sys.exit(-1)
@@ -66,9 +95,9 @@ class Perceptron:
         print('Sq : \n', self.__mean_squared_error)
         return self.__mean_squared_error
 
-
-    def backwardPropagation(self, validate_out):
-        pass
-
     def output(self) -> np.array:
+        """
+        Might be converted to private
+        :return:
+        """
         return self.__output_data

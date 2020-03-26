@@ -3,7 +3,7 @@
 
 import sys
 
-from MLPApproximator.MlpAssembly import MlpApproximatorTester
+from MLPApproximator.MlpAssembly import MlpApproximatorAssembler
 
 if __name__ == "__main__":
-    sys.exit(MlpApproximatorTester().run())
+    sys.exit(MlpApproximatorAssembler().run())

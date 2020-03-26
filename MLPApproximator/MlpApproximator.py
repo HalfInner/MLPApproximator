@@ -19,6 +19,7 @@ class MlpApproximator:
 
     def propagateForward(self, input_data):
         """
+        Might be converted to private
 
         :param input_data:
         """
@@ -26,6 +27,7 @@ class MlpApproximator:
 
     def propagateErrorBackward(self, expected_output_data):
         """
+        Might be converted to private
 
         :param expected_output_data:
         """

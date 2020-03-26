@@ -5,6 +5,9 @@ import numpy as np
 
 
 class SigmoidActivationFunction:
+    """
+    Threshold function for the output
+    """
 
     def __init__(self) -> None:
         super().__init__()
