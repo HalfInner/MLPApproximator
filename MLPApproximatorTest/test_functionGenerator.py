@@ -3,7 +3,7 @@
 
 from unittest import TestCase
 
-from MLPApproximator.MlpAssembly import FunctionGenerator
+from MLPApproximator.MlpFunctionGenerator import FunctionGenerator
 
 
 class TestFunctionGenerator(TestCase):
