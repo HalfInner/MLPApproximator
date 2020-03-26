@@ -27,6 +27,7 @@ class FunctionGenerator:
         output_str = ""
         for polynomial in self.__function_store:
             step = -1
+            polynomial_str = ''
             for factor in reversed(polynomial):
                 step += 1
                 if factor == 0:
@@ -37,9 +38,8 @@ class FunctionGenerator:
                     local_str += 'x'
                 if step > 1:
                     local_str += 'x^' + str(step)
-                output_str = local_str + output_str
-            output_str = output_str.replace(' + ', '', 1).lstrip()
-            output_str += "\n"
+                polynomial_str = local_str + polynomial_str
+            output_str += polynomial_str.replace(' + ', '', 1).lstrip() + '\n'
 
         return output_str
 

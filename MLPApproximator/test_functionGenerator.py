@@ -19,6 +19,6 @@ class TestFunctionGenerator(TestCase):
         function_generator.addFunction([10, 4, 3])
         function_generator.addFunction([-5, 4, 3])
 
-        expected_output = "10x^2 + 4x + 3" \
-                          "-5x^2 + 4x + 3"
+        expected_output = '10x^2 + 4x + 3\n'\
+                          '-5x^2 + 4x + 3\n'
         self.assertEqual(expected_output, function_generator.to_string())
