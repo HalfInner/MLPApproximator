@@ -38,13 +38,13 @@ class FunctionGenerator:
         """
 
         :param polynomial: group of consecutive polynomial
-            e.g. [2, 3, 1] > 2x^2 + 3x^1 + 1
+            e.g. [2, 3, 1] => 2x^2 + 3x^1 + 1
         """
         self.__function_store.append(polynomial)
 
     def generate(self, samples_number=1):
-        input_set = np.zeros([samples_number, len(self.__function_store)], dtype=float)
-        output_set = np.zeros([samples_number, len(self.__function_store)], dtype=float)
+        input_set = np.zeros([len(self.__function_store), samples_number], dtype=float)
+        output_set = np.zeros([len(self.__function_store), samples_number], dtype=float)
 
         for x in range(samples_number):
             for idx, polynomial in enumerate(self.__function_store):
