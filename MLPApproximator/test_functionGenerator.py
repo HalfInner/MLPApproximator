@@ -40,7 +40,6 @@ class TestFunctionGenerator(TestCase):
         function_generator.addFunction([a, b, c + 1])
         testing_set = function_generator.generate()
 
-
         first_sample_indxe = 0
         first_function_index = 0
         self.assertEqual(0, testing_set.X[first_function_index][first_sample_indxe])
@@ -49,3 +48,18 @@ class TestFunctionGenerator(TestCase):
         second_function_index = 1
         self.assertEqual(0, testing_set.X[second_function_index][first_sample_indxe])
         self.assertEqual(c + 1, testing_set.Y[second_function_index][first_sample_indxe])
+
+    def test_generateTrippleSampleTrippleFunction(self):
+        function_generator = FunctionGenerator()
+        function_number = 3
+        base_factor = 10
+        for x in range(function_number):
+            # f(x) = 2x^1 + 10
+            function_generator.addFunction([2, base_factor])
+
+        sample_number = 3
+        testing_set = function_generator.generate(sample_number)
+
+        for function_idx in range(function_number):
+            for sample_idx in range(sample_number):
+                self.assertEqual(2 * sample_idx + base_factor, testing_set.Y[function_idx][sample_idx])
