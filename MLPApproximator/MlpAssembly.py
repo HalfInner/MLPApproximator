@@ -1,3 +1,6 @@
+#  Copyright (c) 2020
+#  Kajetan Brzuszczak
+
 import numpy as np
 
 from MLPApproximator.MlpApproximator import MlpApproximator
@@ -10,7 +13,7 @@ class MlpApproximatorTester:
         expected_out = np.array([1, 0]).reshape((2, 1))
 
         mlp_approximator = MlpApproximator(2, 2)
-        mlp_approximator.forwardPropagation(first_sample)
-        mlp_approximator.doWeirdStuff(expected_out)
+        mlp_approximator.propagateForward(first_sample)
+        mlp_approximator.propagateErrorBackward(expected_out)
 
         return 0

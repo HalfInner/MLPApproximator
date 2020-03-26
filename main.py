@@ -1,3 +1,6 @@
+#  Copyright (c) 2020
+#  Kajetan Brzuszczak
+
 import sys
 
 from MLPApproximator.MlpAssembly import MlpApproximatorTester
