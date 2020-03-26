@@ -30,9 +30,6 @@ class MlpApproximator:
         :param expected_output_data:
         """
         p2_error = self.__p2.meanSquaredErrorOutput(expected_output_data)
-        self.__p2.train(expected_output_data)
-        # p2.weights * output.p2
-        # 1 - output.p1
-        #  output.p1
+        self.__p2.train()
         self.__p1.meanSquaredErrorHidden(self.__p2.weights(), p2_error)
         self.__p1.train()

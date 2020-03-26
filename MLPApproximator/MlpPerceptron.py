@@ -27,11 +27,12 @@ class Perceptron:
         self.__mean_squared_error = None
         self.__input_data = None
 
-    def train(self, expected_output_data):
+    def train(self):
         if self.__input_data is None:
             raise RuntimeError('Cannot proceed train without input')
         delta = 0.1 * self.__mean_squared_error @ self.__input_data.transpose()
         self.__weights += delta
+        print('Weights \n', self.__weights)
 
     def weights(self):
         return self.__weights
