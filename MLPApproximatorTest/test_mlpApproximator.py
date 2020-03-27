@@ -1,12 +1,13 @@
 #  Copyright (c) 2020
 #  Kajetan Brzuszczak
 import sys
-
-import numpy as np
 from io import StringIO
 from unittest import TestCase
 
+import numpy as np
+
 from MLPApproximator.MlpApproximator import MlpApproximator
+from MLPApproximator.MlpFunctionGenerator import TestingSet
 
 
 class TestMlpApproximator(TestCase):
@@ -26,9 +27,7 @@ class TestMlpApproximator(TestCase):
         sys.stdout = string_io_out = StringIO()
 
         mlp_approximator = MlpApproximator(2, 2, 3, debug_on=True)
-        mlp_approximator.propagateForward(first_sample)
-        mlp_approximator.propagateErrorBackward(expected_out)
-
+        mlp_approximator.train(TestingSet([first_sample, expected_out]))
         sys.stdout = original_stdout
 
         expected_out = """

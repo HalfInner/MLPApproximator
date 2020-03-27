@@ -5,25 +5,29 @@ import numpy as np
 
 
 class TestingSet:
-
-    def __init__(self, set) -> None:
-        self.__set = set
+    """
+    Wrapper for testing set.
+    First matrix shall contains INPUTS/X
+    Second matrix shall contains OUTPUTS/Y
+    """
+    def __init__(self, data_set) -> None:
+        self.__data_set = data_set
 
     @property
     def X(self):
-        return self.__set[0]
+        return self.__data_set[0]
 
     @property
     def Y(self):
-        return self.__set[1]
+        return self.__data_set[1]
 
     @property
     def Input(self):
-        return self.__set[0]
+        return self.__data_set[0]
 
     @property
     def Output(self):
-        return self.__set[1]
+        return self.__data_set[1]
 
 
 class FunctionGenerator:
