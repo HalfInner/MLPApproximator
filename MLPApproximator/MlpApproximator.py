@@ -25,21 +25,29 @@ class MlpApproximator:
         self.__p1 = Perceptron(input_number, hidden_layer_number, debug_on=debug_on)
         self.__p2 = Perceptron(hidden_layer_number, output_number, debug_on=debug_on)
         self.__mean_output_error = None
+        self.__output = None
 
     def train(self, train_data_set: TestingSet, epoch_number=1):
         if epoch_number <= 0:
             raise RuntimeError('Epoch must be at least one')
 
         for epoch in range(epoch_number):
+            self.__debug('Current epoch: ', epoch)
             self.propagateForward(train_data_set.Input)
-            self.__mean_output_error = self.__p2.meanSquaredErrorOutput(train_data_set.Output)
 
+            self.__mean_output_error = self.__p2.meanSquaredErrorOutput(train_data_set.Output)
             self.__p2.train()
+
             self.__p1.meanSquaredErrorHidden(self.__p2.weights(), self.__mean_output_error)
             self.__p1.train()
 
+        self.__output = self.__p2.output()
+
     def test(self, test_data_set):  # TODO (kaj): Begin with training the neural network
         pass
+
+    def output(self):
+        return self.__output
 
     def meanSquaredError(self):
         return self.__mean_output_error
