@@ -1,5 +1,6 @@
 #  Copyright (c) 2020
 #  Kajetan Brzuszczak
+import numpy as np
 
 from MLPApproximator.MlpFunctionGenerator import TestingSet
 from MLPApproximator.MlpPerceptron import Perceptron
@@ -11,7 +12,9 @@ class MlpApproximator:
     Approximate function shape
     """
 
-    def __init__(self, input_number, output_number, hidden_layer_number=3, debug_on=False):
+    def __init__(self, input_number, output_number, hidden_layer_number,
+                 activation_function_hidden_layer, activation_function_output_layer, debug_on=False,
+                 hidden_layer_weights=None, output_layer_weights=None):
         """
 
         :param input_number:
@@ -22,8 +25,18 @@ class MlpApproximator:
         self.__debug_on = debug_on
         self.__input_number = input_number
         self.__output_number = output_number
-        self.__p1 = Perceptron(input_number, hidden_layer_number, debug_on=debug_on)
-        self.__p2 = Perceptron(hidden_layer_number, output_number, debug_on=debug_on)
+        self.__p1 = Perceptron(
+            input_number,
+            hidden_layer_number,
+            activation_function=activation_function_hidden_layer,
+            debug_on=debug_on,
+            weight=hidden_layer_weights)
+        self.__p2 = Perceptron(
+            hidden_layer_number,
+            output_number,
+            activation_function=activation_function_output_layer,
+            debug_on=debug_on,
+            weight=output_layer_weights)
         self.__mean_output_error = None
         self.__output = None
 
@@ -33,15 +46,13 @@ class MlpApproximator:
 
         for epoch in range(epoch_number):
             self.__debug('Current epoch: ', epoch)
-            self.propagateForward(train_data_set.Input)
+            self.__output = self.propagateForward(train_data_set.Input)
 
-            self.__mean_output_error = self.__p2.meanSquaredErrorOutput(train_data_set.Output)
-            self.__p2.train()
+            self.propagateErrorBackward(train_data_set.Output)
 
-            self.__p1.meanSquaredErrorHidden(self.__p2.weights(), self.__mean_output_error)
-            self.__p1.train()
-
+        self.__debug('Current denormalized output ', self.__p2.output())
         self.__output = self.__p2.output()
+        return self.__output
 
     def test(self, test_data_set):  # TODO (kaj): Begin with training the neural network
         pass
@@ -58,7 +69,7 @@ class MlpApproximator:
 
         :param input_data:
         """
-        self.__p2.forwardPropagation(self.__p1.forwardPropagation(input_data).output())
+        return self.__p2.forwardPropagation(self.__p1.forwardPropagation(input_data))
 
     def propagateErrorBackward(self, expected_output_data):
         """
@@ -66,10 +77,23 @@ class MlpApproximator:
 
         :param expected_output_data:
         """
-        self.__p2.train()
-        self.__p1.meanSquaredErrorHidden(self.__p2.weights(), p2_error)
-        self.__p1.train()
+        # self.__p2.train()
+        # self.__p1.propagateHiddenBackward(self.__p2.weights(), self.__p2.output())
+        # self.__p1.train()
+        next_correction, next_weight = self.__p2.propagateBackward(expected_output_data)
+        self.__p1.propagateHiddenBackward(next_correction, next_weight)
 
     def __debug(self, msg, *args):
         if self.__debug_on:
-            print(msg, *args)
+            print('Approximator: ', msg, *args)
+
+    def __normalize(self, data_set, has_storing=False):
+        min_from_set = np.min(data_set)
+        max_from_set = np.max(data_set)
+        if has_storing:
+            self.__min_x = min_from_set
+            self.__max_x = max_from_set
+        return (data_set + min_from_set) / (max_from_set - min_from_set)
+
+    def __denormalize(self, data_set):
+        return data_set * (self.__max_x + self.__min_x) - self.__min_x

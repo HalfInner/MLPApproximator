@@ -4,9 +4,10 @@ from datetime import date
 from itertools import product
 from unittest import TestCase
 
+from matplotlib import pyplot as plt
+
 from MLPApproximator.MlpApproximator import MlpApproximator
 from MLPApproximator.MlpFunctionGenerator import FunctionGenerator
-from matplotlib import pyplot as plt
 
 
 class TestIntegration(TestCase):
@@ -27,9 +28,9 @@ class TestIntegration(TestCase):
         output_number = 3
         # TODO(kaj): provide random function generator
         training_functions = [
-            [1, 1, 1],
-            [-2, 0, 1],
-            [-1, 1, 1]
+            [0, 1, 1],
+            [0, 1, 1],
+            [0, 1, 1]
         ]
 
         # TODO(kaj): provide random function generator, at least in test functions
@@ -60,6 +61,7 @@ class TestIntegration(TestCase):
             parameter_n = group_parameter[0]
             parameter_i = group_parameter[1]
             print('I: ', parameter_i)
+            parameter_n = 5
             print('N: ', parameter_n)
             mlp_approximator = MlpApproximator(parameter_m, output_number, hidden_layer_number=parameter_n,
                                                debug_on=True)
