@@ -44,14 +44,15 @@ class MlpApproximator:
         if epoch_number <= 0:
             raise RuntimeError('Epoch must be at least one')
 
+        normalized_output_data_set = self.__normalize(train_data_set.Output)
         for epoch in range(epoch_number):
             self.__debug('Current epoch: ', epoch)
             self.__output = self.propagateForward(train_data_set.Input)
 
-            self.propagateErrorBackward(train_data_set.Output)
+            self.propagateErrorBackward(normalized_output_data_set)
 
         self.__debug('Current denormalized output ', self.__p2.output())
-        self.__output = self.__p2.output()
+        self.__output = self.__denormalize(self.__p2.output())
         return self.__output
 
     def test(self, test_data_set):  # TODO (kaj): Begin with training the neural network
@@ -87,12 +88,11 @@ class MlpApproximator:
         if self.__debug_on:
             print('Approximator: ', msg, *args)
 
-    def __normalize(self, data_set, has_storing=False):
+    def __normalize(self, data_set):
         min_from_set = np.min(data_set)
         max_from_set = np.max(data_set)
-        if has_storing:
-            self.__min_x = min_from_set
-            self.__max_x = max_from_set
+        self.__min_x = min_from_set
+        self.__max_x = max_from_set
         return (data_set + min_from_set) / (max_from_set - min_from_set)
 
     def __denormalize(self, data_set):

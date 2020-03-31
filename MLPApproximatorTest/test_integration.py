@@ -6,7 +6,7 @@ from unittest import TestCase
 
 from matplotlib import pyplot as plt
 
-from MLPApproximator.MlpApproximator import MlpApproximator
+from MLPApproximator.MlpApproximatorBuilder import MlpApproximatorBuilder
 from MLPApproximator.MlpFunctionGenerator import FunctionGenerator
 
 
@@ -63,8 +63,14 @@ class TestIntegration(TestCase):
             print('I: ', parameter_i)
             parameter_n = 5
             print('N: ', parameter_n)
-            mlp_approximator = MlpApproximator(parameter_m, output_number, hidden_layer_number=parameter_n,
-                                               debug_on=True)
+
+            mlp_approximator = MlpApproximatorBuilder() \
+                .setInputNumber(parameter_m) \
+                .setHiddenLayerNumber(parameter_n) \
+                .setOutputNumber(output_number) \
+                .setDebugMode(True) \
+                .build()
+
             mlp_approximator.train(training_set, parameter_i)
 
             results.append(mlp_approximator.output())

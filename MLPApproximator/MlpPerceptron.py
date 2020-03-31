@@ -34,7 +34,7 @@ class Perceptron:
         self.__correction = None
         self.__delta_weights = None
 
-        self.__learning_ratio = 0.1
+        self.__learning_ratio = 1.2
 
         self.__output_data = np.zeros(shape=[3, 1])
         self.__mean_squared_error = None
