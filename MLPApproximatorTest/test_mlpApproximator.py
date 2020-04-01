@@ -118,19 +118,17 @@ class TestMlpApproximator(TestCase):
 
             mlp_approximator.train(TestingSet([first_sample, expected_out]), 100)
             out_epoch = mlp_approximator.output()
-            expected_out_1 = np.array([-8781215.94732426, 8781215.94732425]).reshape([2, 1])
 
-            delta_expected = np.abs(expected_out_1 - out_epoch)
-            error_ratio = delta_expected / expected_out
+            have_same_signs = expected_out * out_epoch >= 0.0
+            self.assertTrue(np.alltrue(have_same_signs), 'Out{}. ALl fields must have same sign\n{}'
+                            .format(hidden_layer_number, have_same_signs))
+
+            delta_expected = np.abs(expected_out - out_epoch)
+            error_ratio = np.abs(delta_expected / expected_out)
             accepted_error_level = 0.2
-
             print('Out1=\n{}\nDelta_Expected=\n{}\nErrorRatio=\n{}\n'
                   .format(out_epoch, delta_expected, error_ratio))
 
             self.assertTrue(np.alltrue(accepted_error_level > error_ratio),
                             'Out{}=\n{}\nDelta_Expected=\n{}\nErrorRatio=\n{}\n'
                             .format(hidden_layer_number, out_epoch, delta_expected, error_ratio))
-
-            have_same_signs = expected_out * out_epoch >= 0.0
-            self.assertTrue(np.alltrue(have_same_signs), 'Out{}. ALl fields must have same sign\n{}'
-                            .format(hidden_layer_number, have_same_signs))
