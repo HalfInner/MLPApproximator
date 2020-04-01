@@ -119,12 +119,12 @@ class TestMlpApproximator(TestCase):
                 .build()
 
             out_epoch, metrics = mlp_approximator.train(TestingSet([first_sample, expected_out]), 100)
-            plt.plot(metrics.Corrections[0], label='Correction Out1')
-            plt.plot(metrics.Corrections[1], label='Correction Out2')
+            # plt.plot(metrics.Corrections[0], label='Correction Out1')
+            # plt.plot(metrics.Corrections[1], label='Correction Out2')
             plt.plot(metrics.MeanSquaredErrors[0], label='Mean Squared Error Out1')
             plt.plot(metrics.MeanSquaredErrors[1], label='Mean Squared Error Out2')
+            plt.plot(np.mean(metrics.MeanSquaredErrors, axis=0), label='Mean Squared Error AVG')
             plt.xlabel('Epochs (Hidden Neurons={})'.format(hidden_layer_number))
-            plt.ylabel('correction')
             plt.legend()
             plt.show()
 
