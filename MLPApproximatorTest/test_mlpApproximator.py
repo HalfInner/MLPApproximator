@@ -3,6 +3,7 @@
 from unittest import TestCase
 
 import numpy as np
+from matplotlib import pyplot as plt
 
 from MLPApproximator.MlpApproximatorBuilder import MlpApproximatorBuilder
 from MLPApproximator.MlpFunctionGenerator import TestingSet
@@ -109,26 +110,31 @@ class TestMlpApproximator(TestCase):
         first_sample = np.array([1, 0]).reshape((input_number, 1))
         expected_out = np.array([-great_number, great_number]).reshape((input_number, 1))
 
-        for hidden_layer_number in range(2, 20):
+        for hidden_layer_number in range(2, 10):
             mlp_approximator = MlpApproximatorBuilder() \
                 .setInputNumber(input_number) \
                 .setHiddenLayerNumber(hidden_layer_number) \
                 .setOutputNumber(output_number) \
+                .setDebugMode(False) \
                 .build()
 
-            mlp_approximator.train(TestingSet([first_sample, expected_out]), 100)
-            out_epoch = mlp_approximator.output()
+            out_epoch, metrics = mlp_approximator.train(TestingSet([first_sample, expected_out]), 100)
+            plt.plot(metrics.Corrections[0])
+            plt.xlabel('Epochs (Hidden Neurons={})'.format(hidden_layer_number))
+            plt.ylabel('correction')
+            plt.show()
 
             have_same_signs = expected_out * out_epoch >= 0.0
-            self.assertTrue(np.alltrue(have_same_signs), 'Out{}. ALl fields must have same sign\n{}'
+            self.assertTrue(np.alltrue(have_same_signs),
+                            '\nOut{}. All fields must have same sign\n{}'
                             .format(hidden_layer_number, have_same_signs))
 
             delta_expected = np.abs(expected_out - out_epoch)
             error_ratio = np.abs(delta_expected / expected_out)
             accepted_error_level = 0.2
-            print('Out1=\n{}\nDelta_Expected=\n{}\nErrorRatio=\n{}\n'
-                  .format(out_epoch, delta_expected, error_ratio))
+            print('Out{}=\n{}\nDelta_Expected=\n{}\nErrorRatio=\n{}\n'
+                  .format(hidden_layer_number, out_epoch, delta_expected, error_ratio))
 
             self.assertTrue(np.alltrue(accepted_error_level > error_ratio),
-                            'Out{}=\n{}\nDelta_Expected=\n{}\nErrorRatio=\n{}\n'
+                            '\nOut{}=\n{}\nDelta_Expected=\n{}\nErrorRatio=\n{}\n'
                             .format(hidden_layer_number, out_epoch, delta_expected, error_ratio))

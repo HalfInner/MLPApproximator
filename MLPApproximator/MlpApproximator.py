@@ -6,6 +6,36 @@ from MLPApproximator.MlpFunctionGenerator import TestingSet
 from MLPApproximator.MlpPerceptron import Perceptron
 
 
+class MLPMetrics:
+    """Metrics container"""
+
+    def __init__(self) -> None:
+        self.__corrections = None
+        self.__mean_squared_errors = None
+
+    @property
+    def Corrections(self):
+        return self.__corrections
+
+    @property
+    def MeanSquaredErrors(self):
+        return self.__mean_squared_error
+
+    def addCorrection(self, correction: np.array):
+        if self.__corrections is None:
+            self.__corrections = correction
+            return
+
+        self.__corrections = np.append( self.__corrections, correction, axis=1)
+
+
+    def addMeanSquaredError(self, mean_squared_error: np.array):
+        if self.__mean_squared_errors is None:
+            self.__mean_squared_errors = mean_squared_error
+            return
+
+        self.__mean_squared_errors = np.append( self.__mean_squared_errors, mean_squared_error, axis=1)
+
 class MlpApproximator:
     """
     Multi Layer Perceptron
@@ -45,15 +75,19 @@ class MlpApproximator:
             raise RuntimeError('Epoch must be at least one')
 
         normalized_output_data_set = self.__normalize(train_data_set.Output)
+        learning_history = np.empty(shape=[self.__input_number, 1])
+
+        metrics = MLPMetrics()
         for epoch in range(epoch_number):
             self.__debug('Current epoch: ', epoch)
             self.__output = self.propagateForward(train_data_set.Input)
 
-            self.propagateErrorBackward(normalized_output_data_set)
+            correction = self.propagateErrorBackward(normalized_output_data_set)
+            metrics.addCorrection(correction)
 
         self.__debug('Current denormalized output ', self.__p2.output())
         self.__output = self.__denormalize(self.__p2.output())
-        return self.__output
+        return self.__output, metrics
 
     def test(self, test_data_set):  # TODO (kaj): Begin with training the neural network
         pass
@@ -75,8 +109,10 @@ class MlpApproximator:
 
         :param expected_output_data:
         """
-        next_correction, next_weight = self.__p2.propagateBackward(expected_output_data)
-        self.__p1.propagateHiddenBackward(next_correction, next_weight)
+        correction, weight = self.__p2.propagateBackward(expected_output_data)
+        self.__p1.propagateHiddenBackward(correction, weight)
+
+        return correction
 
     def __debug(self, msg, *args):
         if self.__debug_on:

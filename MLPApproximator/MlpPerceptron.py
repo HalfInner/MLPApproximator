@@ -24,13 +24,11 @@ class Perceptron:
         else:
             self.__weights = weight
 
+        self.__weights = self.__weights * 0.1
         required_shape = (output_number, input_number)
         if self.__weights.shape != required_shape:
             raise ValueError('Dimension of weights must meet requirements of input and output Expect={} Actual={}'
                              .format(self.__weights.shape, required_shape))
-        #
-        # self.__delta_weights = self.__biases
-        # self.__delta_biases = self.__biases
         self.__correction = None
         self.__delta_weights = None
 
@@ -47,7 +45,6 @@ class Perceptron:
         if self.__input_data is None:
             raise RuntimeError('Cannot proceed train without input')
         self.__weights += self.__delta_weights
-        self.__biases += self.__delta_biases
         self.__debug('Weights \n', self.__weights)
 
     def weights(self):
@@ -85,10 +82,6 @@ class Perceptron:
         """
         if not expected_out.shape == self.__output_data.shape:
             raise ValueError("Shape of validator must be same as the output")
-        # step1 = self.__output_data - expected_out
-        # # step2 = np.ones([self.__output_number, 1]) - self.__output_data
-        # step2 = (1. / self.__input_number) * (step1 @ self.__output_data)
-        # # step3 = self.__output_data
 
         self.__debug('ExpectedOut=\n{}'.format(expected_out))
         self.__debug('Out=\n{}'.format(self.__output_data))
