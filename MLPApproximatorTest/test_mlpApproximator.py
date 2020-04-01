@@ -23,7 +23,6 @@ class TestMlpApproximator(TestCase):
         input_number = output_number = 2
         hidden_layer_number = 3
 
-        # TODO (kaj) : fix normalizer to be able to receive negative values
         first_sample = np.array([1, 2]).reshape((input_number, 1))
         expected_out = np.array([1, 0]).reshape((input_number, 1))
 
@@ -56,7 +55,6 @@ class TestMlpApproximator(TestCase):
 
         zero_number = 0.
         great_number = 10000000
-        # TODO (kaj) : fix normalizer to be able to receive negative values
         first_sample = np.array([1, 0]).reshape((input_number, 1))
         expected_out = np.array([zero_number, great_number]).reshape((input_number, 1))
 
@@ -83,7 +81,6 @@ class TestMlpApproximator(TestCase):
         hidden_layer_number = 3
 
         great_number = 10000000
-        # TODO (kaj) : fix normalizer to be able to receive negative values
         first_sample = np.array([1, 0]).reshape((input_number, 1))
         expected_out = np.array([-great_number, great_number]).reshape((input_number, 1))
 
@@ -103,3 +100,37 @@ class TestMlpApproximator(TestCase):
         out_epoch_1 = mlp_approximator.output()
         expected_out_1 = np.array([-8781215.94732426, 8781215.94732425]).reshape([2, 1])
         self.assertTrue(np.allclose(expected_out_1, out_epoch_1), 'Out1=\n{}'.format(out_epoch_1))
+
+    def test_shouldLearnWhenIncreasedHiddenLayerNeurons(self):
+        """Description must be"""
+        input_number = output_number = 2
+
+        great_number = 10000000
+        first_sample = np.array([1, 0]).reshape((input_number, 1))
+        expected_out = np.array([-great_number, great_number]).reshape((input_number, 1))
+
+        for hidden_layer_number in range(2, 20):
+            mlp_approximator = MlpApproximatorBuilder() \
+                .setInputNumber(input_number) \
+                .setHiddenLayerNumber(hidden_layer_number) \
+                .setOutputNumber(output_number) \
+                .build()
+
+            mlp_approximator.train(TestingSet([first_sample, expected_out]), 100)
+            out_epoch = mlp_approximator.output()
+            expected_out_1 = np.array([-8781215.94732426, 8781215.94732425]).reshape([2, 1])
+
+            delta_expected = np.abs(expected_out_1 - out_epoch)
+            error_ratio = delta_expected / expected_out
+            accepted_error_level = 0.2
+
+            print('Out1=\n{}\nDelta_Expected=\n{}\nErrorRatio=\n{}\n'
+                  .format(out_epoch, delta_expected, error_ratio))
+
+            self.assertTrue(np.alltrue(accepted_error_level > error_ratio),
+                            'Out{}=\n{}\nDelta_Expected=\n{}\nErrorRatio=\n{}\n'
+                            .format(hidden_layer_number, out_epoch, delta_expected, error_ratio))
+
+            have_same_signs = expected_out * out_epoch >= 0.0
+            self.assertTrue(np.alltrue(have_same_signs), 'Out{}. ALl fields must have same sign\n{}'
+                            .format(hidden_layer_number, have_same_signs))
