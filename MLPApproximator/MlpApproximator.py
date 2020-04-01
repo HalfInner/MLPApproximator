@@ -61,9 +61,6 @@ class MlpApproximator:
     def output(self):
         return self.__output
 
-    def meanSquaredError(self):
-        return self.__mean_output_error
-
     def propagateForward(self, input_data):
         """
         Might be converted to private
@@ -78,9 +75,6 @@ class MlpApproximator:
 
         :param expected_output_data:
         """
-        # self.__p2.train()
-        # self.__p1.propagateHiddenBackward(self.__p2.weights(), self.__p2.output())
-        # self.__p1.train()
         next_correction, next_weight = self.__p2.propagateBackward(expected_output_data)
         self.__p1.propagateHiddenBackward(next_correction, next_weight)
 
@@ -89,11 +83,11 @@ class MlpApproximator:
             print('Approximator: ', msg, *args)
 
     def __normalize(self, data_set):
-        min_from_set = np.min(data_set)
-        max_from_set = np.max(data_set)
-        self.__min_x = min_from_set
-        self.__max_x = max_from_set
-        return (data_set + min_from_set) / (max_from_set - min_from_set)
+        self.__min_x = np.min(data_set)
+        self.__max_x = np.max(data_set)
+
+        self.__debug('Min={}\tMax={}'.format(self.__min_x, self.__max_x))
+        return (data_set - self.__min_x) / (self.__max_x - self.__min_x)
 
     def __denormalize(self, data_set):
-        return data_set * (self.__max_x + self.__min_x) - self.__min_x
+        return data_set * (self.__max_x - self.__min_x) + self.__min_x

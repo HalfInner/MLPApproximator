@@ -68,7 +68,7 @@ class TestIntegration(TestCase):
                 .setInputNumber(parameter_m) \
                 .setHiddenLayerNumber(parameter_n) \
                 .setOutputNumber(output_number) \
-                .setDebugMode(True) \
+                .setDebugMode(False) \
                 .build()
 
             mlp_approximator.train(training_set, parameter_i)
