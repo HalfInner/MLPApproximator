@@ -110,7 +110,7 @@ class TestMlpApproximator(TestCase):
         first_sample = np.array([1, 0]).reshape((input_number, 1))
         expected_out = np.array([-great_number, great_number]).reshape((input_number, 1))
 
-        for hidden_layer_number in range(2, 10):
+        for hidden_layer_number in range(2, 30):
             mlp_approximator = MlpApproximatorBuilder() \
                 .setInputNumber(input_number) \
                 .setHiddenLayerNumber(hidden_layer_number) \
@@ -119,9 +119,13 @@ class TestMlpApproximator(TestCase):
                 .build()
 
             out_epoch, metrics = mlp_approximator.train(TestingSet([first_sample, expected_out]), 100)
-            plt.plot(metrics.Corrections[0])
+            plt.plot(metrics.Corrections[0], label='Correction Out1')
+            plt.plot(metrics.Corrections[1], label='Correction Out2')
+            plt.plot(metrics.MeanSquaredErrors[0], label='Mean Squared Error Out1')
+            plt.plot(metrics.MeanSquaredErrors[1], label='Mean Squared Error Out2')
             plt.xlabel('Epochs (Hidden Neurons={})'.format(hidden_layer_number))
             plt.ylabel('correction')
+            plt.legend()
             plt.show()
 
             have_same_signs = expected_out * out_epoch >= 0.0

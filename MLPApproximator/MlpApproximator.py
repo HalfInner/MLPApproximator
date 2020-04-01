@@ -19,22 +19,22 @@ class MLPMetrics:
 
     @property
     def MeanSquaredErrors(self):
-        return self.__mean_squared_error
+        return self.__mean_squared_errors
 
     def addCorrection(self, correction: np.array):
         if self.__corrections is None:
             self.__corrections = correction
             return
 
-        self.__corrections = np.append( self.__corrections, correction, axis=1)
-
+        self.__corrections = np.append(self.__corrections, correction, axis=1)
 
     def addMeanSquaredError(self, mean_squared_error: np.array):
         if self.__mean_squared_errors is None:
             self.__mean_squared_errors = mean_squared_error
             return
 
-        self.__mean_squared_errors = np.append( self.__mean_squared_errors, mean_squared_error, axis=1)
+        self.__mean_squared_errors = np.append(self.__mean_squared_errors, mean_squared_error, axis=1)
+
 
 class MlpApproximator:
     """
@@ -82,8 +82,9 @@ class MlpApproximator:
             self.__debug('Current epoch: ', epoch)
             self.__output = self.propagateForward(train_data_set.Input)
 
-            correction = self.propagateErrorBackward(normalized_output_data_set)
+            correction, mean_squared_error = self.propagateErrorBackward(normalized_output_data_set)
             metrics.addCorrection(correction)
+            metrics.addMeanSquaredError(mean_squared_error)
 
         self.__debug('Current denormalized output ', self.__p2.output())
         self.__output = self.__denormalize(self.__p2.output())
@@ -109,10 +110,10 @@ class MlpApproximator:
 
         :param expected_output_data:
         """
-        correction, weight = self.__p2.propagateBackward(expected_output_data)
+        correction, weight, mean_squared_error = self.__p2.propagateBackward(expected_output_data)
         self.__p1.propagateHiddenBackward(correction, weight)
 
-        return correction
+        return correction, mean_squared_error
 
     def __debug(self, msg, *args):
         if self.__debug_on:

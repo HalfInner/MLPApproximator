@@ -88,7 +88,9 @@ class Perceptron:
         step1 = expected_out - self.__output_data
         self.__calculateCorrectionAndWeights(step1)
 
-        return self.__correction, self.__weights
+        mean_squared_error = np.power(step1, 2)
+
+        return self.__correction, self.__weights, mean_squared_error
 
     def propagateHiddenBackward(self, next_correction, next_weight):
         """
