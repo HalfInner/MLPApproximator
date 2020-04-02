@@ -3,37 +3,8 @@
 import numpy as np
 
 from MLPApproximator.MlpFunctionGenerator import TestingSet
+from MLPApproximator.MlpMetrics import MLPMetrics
 from MLPApproximator.MlpPerceptron import Perceptron
-
-
-class MLPMetrics:
-    """Metrics container"""
-
-    def __init__(self) -> None:
-        self.__corrections = None
-        self.__mean_squared_errors = None
-
-    @property
-    def Corrections(self):
-        return self.__corrections
-
-    @property
-    def MeanSquaredErrors(self):
-        return self.__mean_squared_errors
-
-    def addCorrection(self, correction: np.array):
-        if self.__corrections is None:
-            self.__corrections = correction
-            return
-
-        self.__corrections = np.append(self.__corrections, correction, axis=1)
-
-    def addMeanSquaredError(self, mean_squared_error: np.array):
-        if self.__mean_squared_errors is None:
-            self.__mean_squared_errors = mean_squared_error
-            return
-
-        self.__mean_squared_errors = np.append(self.__mean_squared_errors, mean_squared_error, axis=1)
 
 
 class MlpApproximator:
@@ -81,6 +52,7 @@ class MlpApproximator:
             self.__output = self.propagateForward(train_data_set.Input)
 
             correction, mean_squared_error = self.propagateErrorBackward(normalized_output_data_set)
+
             metrics.addCorrection(correction)
             metrics.addMeanSquaredError(mean_squared_error)
 

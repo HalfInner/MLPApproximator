@@ -117,12 +117,14 @@ class TestMlpApproximator(TestCase):
                 .setOutputNumber(output_number) \
                 .setDebugMode(False) \
                 .build()
-
-            out_epoch, metrics = mlp_approximator.train(TestingSet([first_sample, expected_out]), 100)
+            epoch_number = 100
+            out_epoch, metrics = mlp_approximator.train(TestingSet([first_sample, expected_out]), epoch_number)
             # plt.plot(metrics.Corrections[0], label='Correction Out1')
             # plt.plot(metrics.Corrections[1], label='Correction Out2')
-            plt.plot(metrics.MeanSquaredErrors[0], label='Mean Squared Error Out1')
-            plt.plot(metrics.MeanSquaredErrors[1], label='Mean Squared Error Out2')
+            plt.plot(np.ascontiguousarray(np.arange(epoch_number)), metrics.MeanSquaredErrors[0],
+                     label='Mean Squared Error Out1')
+            plt.plot(np.ascontiguousarray(np.arange(epoch_number)), metrics.MeanSquaredErrors[1],
+                     label='Mean Squared Error Out2')
             plt.plot(np.mean(metrics.MeanSquaredErrors, axis=0), label='Mean Squared Error AVG')
             plt.xlabel('Epochs (Hidden Neurons={})'.format(hidden_layer_number))
             plt.legend()
@@ -148,45 +150,42 @@ class TestMlpApproximator(TestCase):
         input_number = output_number = 1
         hidden_layer_number = 3
 
-        max_samples = 3
-        x = np.arange(max_samples).reshape([1, max_samples])
-        inputs = np.ascontiguousarray(x, dtype=float)
-        f_x = lambda val: val - 100
-        outputs = f_x(inputs)
+        max_samples = 100
 
-        for samples in range(max_samples, max_samples + 1):
+        for samples in range(2, max_samples + 1):
             mlp_approximator = MlpApproximatorBuilder() \
                 .setInputNumber(input_number) \
                 .setHiddenLayerNumber(hidden_layer_number) \
                 .setOutputNumber(output_number) \
                 .setDebugMode(False) \
                 .build()
+
+            x = np.arange(samples).reshape([1, samples])
+            inputs = np.ascontiguousarray(x, dtype=float)
+            f_x = lambda val: val - 100
+            outputs = f_x(inputs)
+
             epoch_number = 100
             learned_outputs, metrics = mlp_approximator.train(
                 TestingSet(
-                    # [np.resize(inputs, [1, samples]), np.resize(outputs, [1, samples])]),
                     [inputs, outputs]),
                 epoch_number=epoch_number)
-            print(learned_outputs)
-            plt.plot(np.ascontiguousarray(np.arange(epoch_number)), metrics.Corrections[0], label='Correction Out1')
-            # plt.plot(metrics.Corrections[1], label='Correction Out2')
-            plt.plot(inputs[0], metrics.MeanSquaredErrors[0], label='Mean Squared Error Out1')
-            # plt.plot(metrics.MeanSquaredErrors[1], label='Mean Squared Error Out2')
-            # plt.plot(np.mean(metrics.MeanSquaredErrors, axis=0), label='Mean Squared Error AVG')
+            print(metrics.MeanSquaredErrors)
+            plt.plot(np.ascontiguousarray(np.arange(epoch_number)), metrics.MeanSquaredErrors[0], label='Correction Out1')
             plt.xlabel('Epochs (Samples={})'.format(samples))
             plt.legend()
             plt.show()
 
-            have_same_signs = outputs * np.resize(learned_outputs, [1, len(outputs.shape[1])]) >= 0.0
+            have_same_signs = outputs * learned_outputs >= 0.0
             self.assertTrue(np.alltrue(have_same_signs),
                             '\nOut{}. All fields must have same sign\n{}'
                             .format(hidden_layer_number, have_same_signs))
 
-            error_ratio = np.mean(metrics.MeanSquaredErrors, axis=0)
-            accepted_error_level = 0.2
-            print('Out{}=\n{}\nDelta_Expected=\n{}\nErrorRatio=\n{}\n'
-                  .format(hidden_layer_number, learned_outputs, delta_expected, error_ratio))
+            metrics.MeanSquaredErrors
+            accepted_error_level = 0.4
+            print('Out{}=\n{}\n\nErrorRatio=\n{}\n'
+                  .format(hidden_layer_number, learned_outputs, metrics.MeanSquaredErrors))
 
-            self.assertTrue(np.alltrue(accepted_error_level > error_ratio),
-                            '\nOut{}=\n{}\nDelta_Expected=\n{}\nErrorRatio=\n{}\n'
-                            .format(hidden_layer_number, learned_outputs, delta_expected, error_ratio))
+            self.assertTrue(np.alltrue(accepted_error_level > metrics.MeanSquaredErrors),
+                            '\nOut{}=\n{}\nErrorRatio=\n{}\n'
+                            .format(hidden_layer_number, learned_outputs, metrics.MeanSquaredErrors))

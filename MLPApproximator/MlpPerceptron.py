@@ -88,7 +88,7 @@ class Perceptron:
         step1 = expected_out - self.__output_data
         self.__calculateCorrectionAndWeights(step1)
 
-        mean_squared_error = np.power(step1, 2)
+        mean_squared_error = np.mean(np.power(step1, 2), axis=1, keepdims=True)
 
         # TODO(kaj): check dimension of 'correction' -> the length of it increasing alongside the samples number
         return self.__correction, self.__weights, mean_squared_error
