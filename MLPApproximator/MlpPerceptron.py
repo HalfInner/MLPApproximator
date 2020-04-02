@@ -90,6 +90,7 @@ class Perceptron:
 
         mean_squared_error = np.power(step1, 2)
 
+        # TODO(kaj): check dimension of 'correction' -> the length of it increasing alongside the samples number
         return self.__correction, self.__weights, mean_squared_error
 
     def propagateHiddenBackward(self, next_correction, next_weight):

@@ -13,8 +13,8 @@ class TestMlpApproximator(TestCase):
 
     def test_propagateForward(self):
         """
-        Book example: One complete iteration o learning 3-layers perceptron (MLP). 3 neurons in hidden layer. 2 neuron on input,
-        and 2 neurons on output
+        Book example: One complete iteration o learning 3-layers perceptron (MLP).
+        3 neurons in hidden layer. 2 neuron on input, and 2 neurons on output
             * const learning ratio = 0.1
             * sigmoid activation function
             * X=(1,2)  f(x)=Y=(1,0)
@@ -142,3 +142,51 @@ class TestMlpApproximator(TestCase):
             self.assertTrue(np.alltrue(accepted_error_level > error_ratio),
                             '\nOut{}=\n{}\nDelta_Expected=\n{}\nErrorRatio=\n{}\n'
                             .format(hidden_layer_number, out_epoch, delta_expected, error_ratio))
+
+    def test_shouldLearnWhenIncreasedNumberOfSamples(self):
+        """Description must be"""
+        input_number = output_number = 1
+        hidden_layer_number = 3
+
+        max_samples = 3
+        x = np.arange(max_samples).reshape([1, max_samples])
+        inputs = np.ascontiguousarray(x, dtype=float)
+        f_x = lambda val: val - 100
+        outputs = f_x(inputs)
+
+        for samples in range(max_samples, max_samples + 1):
+            mlp_approximator = MlpApproximatorBuilder() \
+                .setInputNumber(input_number) \
+                .setHiddenLayerNumber(hidden_layer_number) \
+                .setOutputNumber(output_number) \
+                .setDebugMode(False) \
+                .build()
+            epoch_number = 100
+            learned_outputs, metrics = mlp_approximator.train(
+                TestingSet(
+                    # [np.resize(inputs, [1, samples]), np.resize(outputs, [1, samples])]),
+                    [inputs, outputs]),
+                epoch_number=epoch_number)
+            print(learned_outputs)
+            plt.plot(np.ascontiguousarray(np.arange(epoch_number)), metrics.Corrections[0], label='Correction Out1')
+            # plt.plot(metrics.Corrections[1], label='Correction Out2')
+            plt.plot(inputs[0], metrics.MeanSquaredErrors[0], label='Mean Squared Error Out1')
+            # plt.plot(metrics.MeanSquaredErrors[1], label='Mean Squared Error Out2')
+            # plt.plot(np.mean(metrics.MeanSquaredErrors, axis=0), label='Mean Squared Error AVG')
+            plt.xlabel('Epochs (Samples={})'.format(samples))
+            plt.legend()
+            plt.show()
+
+            have_same_signs = outputs * np.resize(learned_outputs, [1, len(outputs.shape[1])]) >= 0.0
+            self.assertTrue(np.alltrue(have_same_signs),
+                            '\nOut{}. All fields must have same sign\n{}'
+                            .format(hidden_layer_number, have_same_signs))
+
+            error_ratio = np.mean(metrics.MeanSquaredErrors, axis=0)
+            accepted_error_level = 0.2
+            print('Out{}=\n{}\nDelta_Expected=\n{}\nErrorRatio=\n{}\n'
+                  .format(hidden_layer_number, learned_outputs, delta_expected, error_ratio))
+
+            self.assertTrue(np.alltrue(accepted_error_level > error_ratio),
+                            '\nOut{}=\n{}\nDelta_Expected=\n{}\nErrorRatio=\n{}\n'
+                            .format(hidden_layer_number, learned_outputs, delta_expected, error_ratio))

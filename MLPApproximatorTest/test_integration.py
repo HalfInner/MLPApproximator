@@ -4,6 +4,7 @@ from datetime import date
 from itertools import product
 from unittest import TestCase
 
+import numpy as np
 from matplotlib import pyplot as plt
 
 from MLPApproximator.MlpApproximatorBuilder import MlpApproximatorBuilder
@@ -53,6 +54,7 @@ class TestIntegration(TestCase):
 
         required_samples = 100
         training_set = training_function_generator.generate(required_samples)
+        print(training_set.Output[0])
         test_set = test_function_generator.generate(required_samples)
 
         results = []
@@ -71,16 +73,25 @@ class TestIntegration(TestCase):
                 .setDebugMode(False) \
                 .build()
 
-            mlp_approximator.train(training_set, parameter_i)
+            learn_output, metrics = mlp_approximator.train(training_set, parameter_i)
 
-            results.append(mlp_approximator.output())
+            plt.plot(metrics.MeanSquaredErrors[0], label='Mean Squared Error Out1')
+            plt.plot(metrics.MeanSquaredErrors[1], label='Mean Squared Error Out2')
+            plt.plot(np.mean(metrics.MeanSquaredErrors, axis=0), label='Mean Squared Error AVG')
+            plt.xlabel('Epochs (Hidden Neurons={})'.format(parameter_n))
+            plt.legend()
+            plt.show()
+
+            print(learn_output)
+            plt.plot(training_set.Input[0], learn_output[0], label='F1')
+            plt.plot(training_set.Input[1], learn_output[1], label='F2')
+            plt.plot(training_set.Input[2], learn_output[2], label='F3')
+            plt.xlabel('Epochs (Hidden Neurons={})'.format(parameter_n))
+            plt.legend()
+            plt.show()
 
             break
 
-        plt.plot(training_set.X[0], results[0][0], label='Neural Network')
-        plt.plot(training_set.X[0], training_set.Y[0], label='Real Answer')
-
-        plt.show()
 
     def test_runFromDeadline(self):
         delta = date(2020, 0o4, 0o3) - date.today()

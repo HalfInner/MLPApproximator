@@ -75,8 +75,6 @@ class MlpApproximator:
             raise RuntimeError('Epoch must be at least one')
 
         normalized_output_data_set = self.__normalize(train_data_set.Output)
-        learning_history = np.empty(shape=[self.__input_number, 1])
-
         metrics = MLPMetrics()
         for epoch in range(epoch_number):
             self.__debug('Current epoch: ', epoch)
