@@ -12,12 +12,13 @@ class Perceptron:
     """
 
     def __init__(self, input_number, output_number, activation_function=SigmoidActivationFunction(),
-                 debug_on=False, weight=None) -> None:
+                 debug_on=False, weight=None, name="Perceptron") -> None:
         self.__debug_on = debug_on
 
         self.__input_number = input_number
         self.__output_number = output_number
         self.__activation_function = activation_function
+        self.__name = name
 
         if weight is None:
             self.__weights = np.ones((output_number, input_number), dtype=float)
@@ -128,4 +129,4 @@ class Perceptron:
 
     def __debug(self, msg, *args):
         if self.__debug_on:
-            print('Perceptron: \n\t', msg, *args)
+            print('{}: \n\t'.format(self.__name), msg, *args)

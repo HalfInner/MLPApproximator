@@ -152,7 +152,7 @@ class TestMlpApproximator(TestCase):
 
         # TODO(kaj): It works for samples=13 and epochs=14
         #                 not for samples=14 and epochs=14
-        max_samples = 14
+        max_samples = 20
 
         # for samples in range(2, max_samples + 1):
         for samples in range(max_samples, max_samples + 1):
@@ -173,23 +173,34 @@ class TestMlpApproximator(TestCase):
             #             * 54 inverted values -> instead of growing values we have getting small x
             #             * 55 quite possible
             #             * 56 inverted
-            epoch_number = 14
+            epoch_number = 50
 
             learned_outputs, metrics = mlp_approximator.train(
                 TestingSet(
                     [inputs, outputs]),
                 epoch_number=epoch_number)
             print('Metrics : ', metrics.MeanSquaredErrors)
-            plt.plot(np.ascontiguousarray(np.arange(epoch_number)), metrics.MeanSquaredErrors[0],
+
+            fig, ax1 = plt.subplots()
+            ax2 = ax1.twinx()
+            ax1.plot(np.ascontiguousarray(np.arange(epoch_number)), metrics.MeanSquaredErrors[0], 'r-',
                      label='Mean Squared Error')
-            plt.xlabel('Epochs={} Samples={}'.format(epoch_number, samples))
+            ax2.plot(inputs[0], learned_outputs[0], 'g-', label='Out')
+
+            # plt.plot(np.ascontiguousarray(np.arange(epoch_number)), metrics.MeanSquaredErrors[0],
+            #          label='Mean Squared Error')
+            # plt.xlabel('Epochs={} Samples={}'.format(epoch_number, samples))
+            # plt.plot(learned_outputs[0], label='Out')
+            ax1.set_xlabel('')
+            ax1.set_ylabel('Mean Squared Error data', color='b')
+            ax2.set_ylabel('Out data', color='g')
             plt.legend()
             plt.show()
             #
-            plt.plot(learned_outputs[0], label='Out')
-            plt.xlabel('Epochs={} Samples={}'.format(epoch_number, samples))
-            plt.legend()
-            plt.show()
+            # plt.plot(learned_outputs[0], label='Out')
+            # plt.xlabel('Epochs={} Samples={}'.format(epoch_number, samples))
+            # plt.legend()
+            # plt.show()
 
             have_same_signs = outputs * learned_outputs >= 0.0
             self.assertTrue(np.alltrue(have_same_signs),

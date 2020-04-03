@@ -31,13 +31,15 @@ class MlpApproximator:
             hidden_layer_number,
             activation_function=activation_function_hidden_layer,
             debug_on=debug_on,
-            weight=hidden_layer_weights)
+            weight=hidden_layer_weights,
+            name="P_hide")
         self.__p2 = Perceptron(
             hidden_layer_number,
             output_number,
             activation_function=activation_function_output_layer,
             debug_on=debug_on,
-            weight=output_layer_weights)
+            weight=output_layer_weights,
+            name="P_out")
         self.__mean_output_error = None
         self.__output = None
 
@@ -45,15 +47,15 @@ class MlpApproximator:
         if epoch_number <= 0:
             raise RuntimeError('Epoch must be at least one')
 
-        normalized_output_data_set = self.__normalize(train_data_set.Output)
+        normalized_train_data_set = self.__normalize_data_set(train_data_set)
         metrics = MLPMetrics()
         for epoch in range(epoch_number):
             if epoch == 55:
                 a = False
             self.__debug('Current epoch: ', epoch)
-            self.__output = self.propagateForward(train_data_set.Input)
+            self.__output = self.propagateForward(normalized_train_data_set.Input)
 
-            correction, mean_squared_error = self.propagateErrorBackward(normalized_output_data_set)
+            correction, mean_squared_error = self.propagateErrorBackward(normalized_train_data_set.Output)
 
             metrics.addCorrection(correction)
             metrics.addMeanSquaredError(mean_squared_error)
@@ -91,12 +93,13 @@ class MlpApproximator:
         if self.__debug_on:
             print('Approximator: ', msg, *args)
 
-    def __normalize(self, data_set):
-        self.__min_x = np.min(data_set)
-        self.__max_x = np.max(data_set)
+    def __normalize_data_set(self, data_set: TestingSet):
+        self.__min_x = min(np.min(data_set.Input), np.min(data_set.Output))
+        self.__max_x = max(np.max(data_set.Input), np.max(data_set.Output))
 
         self.__debug('Min={}\tMax={}'.format(self.__min_x, self.__max_x))
-        return (data_set - self.__min_x) / (self.__max_x - self.__min_x)
+        return TestingSet([(data_set.Input - self.__min_x) / (self.__max_x - self.__min_x),
+                           (data_set.Output - self.__min_x) / (self.__max_x - self.__min_x)])
 
     def __denormalize(self, data_set):
         return data_set * (self.__max_x - self.__min_x) + self.__min_x
