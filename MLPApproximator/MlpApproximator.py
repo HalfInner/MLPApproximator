@@ -48,6 +48,8 @@ class MlpApproximator:
         normalized_output_data_set = self.__normalize(train_data_set.Output)
         metrics = MLPMetrics()
         for epoch in range(epoch_number):
+            if epoch == 55:
+                a = False
             self.__debug('Current epoch: ', epoch)
             self.__output = self.propagateForward(train_data_set.Input)
 
