@@ -47,21 +47,23 @@ class MlpApproximator:
         if epoch_number <= 0:
             raise RuntimeError('Epoch must be at least one')
 
-        normalized_train_data_set = self.__normalize_data_set(train_data_set)
+        normalized_train_data_input = self.__normalize_data_input(train_data_set.Input)
+        normalized_train_data_output = self.__normalize_data_output(train_data_set.Output)
         metrics = MLPMetrics()
         for epoch in range(epoch_number):
-            if epoch == 55:
-                a = False
             self.__debug('Current epoch: ', epoch)
-            self.__output = self.propagateForward(normalized_train_data_set.Input)
+            self.__debug('Forward Propagation')
+            self.__output = self.propagateForward(normalized_train_data_input)
+            # self.__output = self.propagateForward(train_data_set.Input)
 
-            correction, mean_squared_error = self.propagateErrorBackward(normalized_train_data_set.Output)
+            self.__debug('Backward Error Propagation')
+            correction, mean_squared_error = self.propagateErrorBackward(normalized_train_data_output)
 
             metrics.addCorrection(correction)
             metrics.addMeanSquaredError(mean_squared_error)
 
         self.__debug('Current denormalized output ', self.__p2.output())
-        self.__output = self.__denormalize(self.__p2.output())
+        self.__output = self.__denormalize_output(self.__p2.output())
         return self.__output, metrics
 
     def test(self, test_data_set):  # TODO (kaj): Begin with training the neural network
@@ -93,13 +95,21 @@ class MlpApproximator:
         if self.__debug_on:
             print('Approximator: ', msg, *args)
 
-    def __normalize_data_set(self, data_set: TestingSet):
-        self.__min_x = min(np.min(data_set.Input), np.min(data_set.Output))
-        self.__max_x = max(np.max(data_set.Input), np.max(data_set.Output))
+    def __normalize_data_input(self, data_set: np.array):
+        extending_ratio = 1.1
+        self.__min_in = np.min(data_set) * extending_ratio
+        self.__max_in = np.max(data_set) * extending_ratio
 
-        self.__debug('Min={}\tMax={}'.format(self.__min_x, self.__max_x))
-        return TestingSet([(data_set.Input - self.__min_x) / (self.__max_x - self.__min_x),
-                           (data_set.Output - self.__min_x) / (self.__max_x - self.__min_x)])
+        self.__debug('IN  Min={}\tMax={}'.format(self.__min_in, self.__max_in))
+        return (data_set - self.__min_in) / (self.__max_in - self.__min_in)
 
-    def __denormalize(self, data_set):
-        return data_set * (self.__max_x - self.__min_x) + self.__min_x
+    def __normalize_data_output(self, data_set: np.array):
+        extending_ratio = 1.1
+        self.__min_out = np.min(data_set) * extending_ratio
+        self.__max_out = np.max(data_set) * extending_ratio
+
+        self.__debug('OUT Min={}\tMax={}'.format(self.__min_out, self.__max_out))
+        return (data_set - self.__min_out) / (self.__max_out - self.__min_out)
+
+    def __denormalize_output(self, data_set):
+        return data_set * (self.__max_out - self.__min_out) + self.__min_out

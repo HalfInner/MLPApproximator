@@ -21,7 +21,9 @@ class Perceptron:
         self.__name = name
 
         if weight is None:
-            self.__weights = np.ones((output_number, input_number), dtype=float)
+            test_seed = 1
+            np.random.seed(test_seed)
+            self.__weights = np.random.randint(2, size=(output_number, input_number)) * 2 - 1
         else:
             self.__weights = weight
 
@@ -64,7 +66,8 @@ class Perceptron:
         :return:
         """
         self.__input_data = input_data
-        self.__debug('Input=\n{}\n\tWeights=\n{}'.format(input_data, self.__weights))
+        self.__debug('Input=\n{}'.format(input_data))
+        self.__debug('Weights=\n{}'.format(self.__weights))
 
         raw_output = self.__weights @ self.__input_data
         self.__debug('Raw Out=\n{}'.format(raw_output))
@@ -121,7 +124,7 @@ class Perceptron:
     def __calculateCorrectionAndWeights(self, step1):
         step2 = np.ones_like(self.__output_data) - self.__output_data
         self.__correction = step1 * step2 * self.__output_data
-        self.__debug('correction=\n{}'.format(self.__correction))
+        self.__debug('Correction=\n{}'.format(self.__correction))
         self.__delta_weights = self.__learning_ratio * self.__correction @ self.__input_data.transpose()
         self.__debug('Delta weights=\n{}'.format(self.__delta_weights))
         self.__weights = self.__weights + self.__delta_weights
@@ -129,4 +132,4 @@ class Perceptron:
 
     def __debug(self, msg, *args):
         if self.__debug_on:
-            print('{}: \n\t'.format(self.__name), msg, *args)
+            print('{:>12s}: '.format(self.__name), msg, *args)
