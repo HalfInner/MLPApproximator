@@ -154,7 +154,7 @@ class TestMlpApproximator(TestCase):
             but I am not sure this rule of thumb is proven.'
         """
 
-        max_samples = 100
+        max_samples = 4
         input_number = output_number = max_samples
         hidden_layer_number = 3
 
@@ -186,15 +186,15 @@ class TestMlpApproximator(TestCase):
                 TestingSet([inputs, outputs]),
                 epoch_number=epoch_number)
 
-            plt.plot(np.ascontiguousarray(np.arange(epoch_number)), metrics.MeanSquaredErrors[0],
+            plt.plot(np.ascontiguousarray(np.arange(epoch_number)), metrics.MeanSquaredErrors[0], 'x-',
                      label='Mean Squared Error')
             plt.xlabel('Epochs={} Samples={} HiddenNeurons={}'.format(epoch_number, samples, hidden_layer_number))
-            plt.ylim(0, 1.)
+            plt.ylim(0, 1.1)
             plt.legend()
             plt.show()
 
-            plt.plot(outputs.T[0], label='Out')
-            plt.plot(learned_outputs.T[0], label='Approximation')
+            plt.plot(outputs.T[0], 'x-', label='Out')
+            plt.plot(learned_outputs.T[0], 'x-', label='Approximation')
             plt.xlabel('Epochs={} Samples={} HiddenNeurons={}'.format(epoch_number, samples, hidden_layer_number))
             plt.ylim(0, max(outputs.T[0]))
             plt.legend()

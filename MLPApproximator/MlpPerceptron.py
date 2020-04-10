@@ -103,7 +103,7 @@ class Perceptron:
 
         # TODO(kaj): in another implementation they power up the mean -> not mean the power up
         # mean_squared_error = np.mean(np.power(step1, 2), axis=1, keepdims=True)
-        mean_squared_error = np.sum(np.power(step1, 2), axis=0, keepdims=True)
+        mean_squared_error = np.mean(np.power(step1, 2), axis=0, keepdims=True)
         old_weights = self.__weights
         # TODO(kaj): check dimension of 'correction' -> the length of it increasing alongside the samples number
         return self.__correction, self.__weights, mean_squared_error
@@ -121,6 +121,8 @@ class Perceptron:
         # self.dW1 = (1 / m) * np.dot(self.dZ1, X)
         # self.db1 = (1 / m) * np.sum(self.dZ1, axis=1, keepdims=True)
 
+        self.__debug('next_weight=\n{}'.format(next_weight))
+        self.__debug('next_correction=\n{}'.format(next_correction))
         step1 = next_weight.transpose() @ next_correction
         self.__calculateCorrectionAndWeights(step1)
 
@@ -139,8 +141,10 @@ class Perceptron:
         self.__debug('step1=\n{}'.format(step1))
         step2 = 1. - self.__output_data
         self.__correction = step1 * step2 * self.__output_data
-        self.__debug('Correction=\n{}'.format(self.__correction))
 
+        self.__debug('Learning ratio=\n{}'.format(self.__learning_ratio))
+        self.__debug('Correction=\n{}'.format(self.__correction))
+        self.__debug('Input=\n{}'.format(self.__input_data))
         self.__delta_weights = self.__learning_ratio * self.__correction @ self.__input_data.transpose()
 
         self.__debug('Delta weights=\n{}'.format(self.__delta_weights))
