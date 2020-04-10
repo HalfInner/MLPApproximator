@@ -36,7 +36,7 @@ class Perceptron:
         # if self.__weights.shape != required_shape:
         #     raise ValueError('Dimension of weights must meet requirements of input and output Expect={} Actual={}'
         #                      .formatvd(self.__weights.shape, required_shape))
-        self.__correction = None
+        self.__gradient = None
         self.__delta_weights = None
 
         # self.__learning_ratio = 1.2
@@ -50,10 +50,12 @@ class Perceptron:
         """
         Train the perceptron.
         """
-        if self.__input_data is None:
-            raise RuntimeError('Cannot proceed train without input')
-        self.__weights += self.__delta_weights
-        self.__debug('Weights \n', self.__weights)
+
+        # if self.__input_data is None:
+        #     raise RuntimeError('Cannot proceed train without input')
+        # self.__weights += self.__delta_weights
+        # self.__debug('Weights \n', self.__weights)
+        pass
 
     def weights(self):
         """
@@ -70,15 +72,11 @@ class Perceptron:
         :param input_data:
         :return:
         """
-
-        # self.__weights.resize(self.__output_number, input_data.shape[0])
-
         self.__input_data = input_data
         self.__debug('Input=\n{}'.format(input_data))
         self.__debug('Weights=\n{}'.format(self.__weights))
 
-        # raw_output = (self.__weights + self.__bias) @ self.__input_data
-        raw_output = self.__weights @ self.__input_data
+        raw_output = self.__input_data @ self.__weights.T
         self.__debug('Raw Out=\n{}'.format(raw_output))
 
         self.__output_data = self.__activation_function(raw_output)
@@ -116,17 +114,12 @@ class Perceptron:
         :param next_weight:
         :return:
         """
-        # # sys.exit(-1)
-        # self.dZ1 = np.multiply(np.dot(self.W2.T, self.dZ2), 1 - np.power(self.A1, 2))
-        # self.dW1 = (1 / m) * np.dot(self.dZ1, X)
-        # self.db1 = (1 / m) * np.sum(self.dZ1, axis=1, keepdims=True)
-
         self.__debug('next_weight=\n{}'.format(next_weight))
         self.__debug('next_correction=\n{}'.format(next_correction))
-        step1 = next_weight.transpose() @ next_correction
-        self.__calculateCorrectionAndWeights(step1)
+        difference_increase = next_correction @ next_weight
+        self.__calculateCorrectionAndWeights(difference_increase)
 
-        return self.__correction, self.__weights
+        return self.__gradient, self.__weights
 
     def output(self) -> np.array:
         """
@@ -135,21 +128,20 @@ class Perceptron:
         """
         return self.__output_data
 
-    def __calculateCorrectionAndWeights(self, step1):
-        # self.__bias -= self.__learning_ratio * step1
-
-        self.__debug('step1=\n{}'.format(step1))
-        step2 = 1. - self.__output_data
-        self.__correction = step1 * step2 * self.__output_data
+    def __calculateCorrectionAndWeights(self, difference_increase):
+        self.__debug('difference_increase=\n{}'.format(difference_increase))
+        gradient = self.__output_data * (1. - self.__output_data)
+        self.__debug('gradient=\n{}'.format(gradient))
+        self.__correction = difference_increase * gradient
 
         self.__debug('Learning ratio=\n{}'.format(self.__learning_ratio))
         self.__debug('Correction=\n{}'.format(self.__correction))
         self.__debug('Input=\n{}'.format(self.__input_data))
-        self.__delta_weights = self.__learning_ratio * self.__correction @ self.__input_data.transpose()
+        self.__delta_weights = self.__learning_ratio * self.__correction.T @ self.__input_data
 
         self.__debug('Delta weights=\n{}'.format(self.__delta_weights))
-
         self.__weights = self.__weights + self.__delta_weights
+
         self.__debug('New Weights=\n{}'.format(self.__weights))
 
     def __debug(self, msg, *args):

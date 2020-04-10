@@ -154,9 +154,9 @@ class TestMlpApproximator(TestCase):
             but I am not sure this rule of thumb is proven.'
         """
 
-        max_samples = 4
-        input_number = output_number = max_samples
-        hidden_layer_number = 3
+        max_samples = 30
+        input_number = output_number = 1
+        hidden_layer_number = 7
 
         # for samples in range(2, max_samples + 1):
         # for samples in range(max_samples, max_samples + 1):
@@ -166,7 +166,7 @@ class TestMlpApproximator(TestCase):
                 .setInputNumber(input_number) \
                 .setHiddenLayerNumber(hidden_layer_number) \
                 .setOutputNumber(output_number) \
-                .setDebugMode(True) \
+                .setDebugMode(False) \
                 .build()
 
             x = np.arange(samples).reshape([samples, 1]) * 2 * np.pi / samples
@@ -180,7 +180,7 @@ class TestMlpApproximator(TestCase):
             #             * 54 inverted values -> instead of growing values we have getting small x
             #             * 55 quite possible
             #             * 56 inverted
-            epoch_number = 10
+            epoch_number = 10000
 
             learned_outputs, metrics = mlp_approximator.train(
                 TestingSet([inputs, outputs]),
