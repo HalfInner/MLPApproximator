@@ -154,9 +154,9 @@ class TestMlpApproximator(TestCase):
             but I am not sure this rule of thumb is proven.'
         """
 
-        max_samples = 30
+        max_samples = 3
         input_number = output_number = 1
-        hidden_layer_number = 7
+        hidden_layer_number = 4
 
         # for samples in range(2, max_samples + 1):
         # for samples in range(max_samples, max_samples + 1):
@@ -166,7 +166,7 @@ class TestMlpApproximator(TestCase):
                 .setInputNumber(input_number) \
                 .setHiddenLayerNumber(hidden_layer_number) \
                 .setOutputNumber(output_number) \
-                .setDebugMode(False) \
+                .setDebugMode(True) \
                 .build()
 
             x = np.arange(samples).reshape([samples, 1]) * 2 * np.pi / samples
@@ -180,7 +180,7 @@ class TestMlpApproximator(TestCase):
             #             * 54 inverted values -> instead of growing values we have getting small x
             #             * 55 quite possible
             #             * 56 inverted
-            epoch_number = 10000
+            epoch_number = 100
 
             learned_outputs, metrics = mlp_approximator.train(
                 TestingSet([inputs, outputs]),
@@ -196,7 +196,7 @@ class TestMlpApproximator(TestCase):
             plt.plot(outputs.T[0], 'x-', label='Out')
             plt.plot(learned_outputs.T[0], 'x-', label='Approximation')
             plt.xlabel('Epochs={} Samples={} HiddenNeurons={}'.format(epoch_number, samples, hidden_layer_number))
-            plt.ylim(0, max(outputs.T[0]))
+            plt.ylim(0, max(outputs.T[0]) + 1.1)
             plt.legend()
             plt.show()
 

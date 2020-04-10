@@ -26,44 +26,19 @@ class Perceptron:
         if weight is None:
             test_seed = 1
             np.random.seed(test_seed)
-            self.__weights = np.random.randint(2, size=(output_number, input_number)) * 2 - 1
+            self.__weights = np.random.randn(output_number, input_number) * 0.1
         else:
             self.__weights = weight
 
-        self.__weights = self.__weights * 0.1
-        # self.__bias = np.zeros_like(self.__weights)
         required_shape = (output_number, input_number)
-        # if self.__weights.shape != required_shape:
-        #     raise ValueError('Dimension of weights must meet requirements of input and output Expect={} Actual={}'
-        #                      .formatvd(self.__weights.shape, required_shape))
         self.__gradient = None
         self.__delta_weights = None
 
-        # self.__learning_ratio = 1.2
         self.__learning_ratio = 0.5
 
         self.__output_data = np.zeros(shape=[3, 1])
         self.__mean_squared_error = None
         self.__input_data = None
-
-    def train(self):
-        """
-        Train the perceptron.
-        """
-
-        # if self.__input_data is None:
-        #     raise RuntimeError('Cannot proceed train without input')
-        # self.__weights += self.__delta_weights
-        # self.__debug('Weights \n', self.__weights)
-        pass
-
-    def weights(self):
-        """
-        Might be converted to private
-
-        :return:
-        """
-        return self.__weights
 
     def forwardPropagation(self, input_data):
         """
@@ -79,7 +54,7 @@ class Perceptron:
         raw_output = self.__input_data @ self.__weights.T
         self.__debug('Raw Out=\n{}'.format(raw_output))
 
-        self.__output_data = self.__activation_function(raw_output)
+        self.__output_data = self.__activation_function.activate(raw_output)
         self.__debug('Activated Out=\n{}'.format(self.__output_data))
 
         return self.__output_data
@@ -100,12 +75,10 @@ class Perceptron:
         self.__calculateCorrectionAndWeights(step1)
 
         # TODO(kaj): in another implementation they power up the mean -> not mean the power up
-        # mean_squared_error = np.mean(np.power(step1, 2), axis=1, keepdims=True)
         mean_squared_error = np.mean(np.power(step1, 2), axis=0, keepdims=True)
         old_weights = self.__weights
         # TODO(kaj): check dimension of 'correction' -> the length of it increasing alongside the samples number
         return self.__correction, self.__weights, mean_squared_error
-        # return self.__correction, old_weights, mean_squared_error
 
     def propagateHiddenBackward(self, next_correction, next_weight):
         """
@@ -130,9 +103,7 @@ class Perceptron:
 
     def __calculateCorrectionAndWeights(self, difference_increase):
         self.__debug('difference_increase=\n{}'.format(difference_increase))
-        gradient = self.__output_data * (1. - self.__output_data)
-        self.__debug('gradient=\n{}'.format(gradient))
-        self.__correction = difference_increase * gradient
+        self.__correction = self.__activation_function.differentiate(difference_increase, self.__output_data)
 
         self.__debug('Learning ratio=\n{}'.format(self.__learning_ratio))
         self.__debug('Correction=\n{}'.format(self.__correction))
