@@ -146,33 +146,57 @@ class TestMlpApproximator(TestCase):
                             .format(hidden_layer_number, out_epoch, delta_expected, error_ratio))
 
     def test_shouldLearnWhenIncreasedNumberOfSamples(self):
-        """Description must be"""
-        input_number = output_number = 1
-        hidden_layer_number = 3
+        """
+        Description must be
+
+        Noteworthy quote:
+            'Normally in my lab the ideal node is around 2 * input * output + 1, e.g., 5-21-2 or 5-11-1,
+            but I am not sure this rule of thumb is proven.'
+        """
 
         max_samples = 100
+        input_number = output_number = max_samples
+        hidden_layer_number = 3
 
-        for samples in range(2, max_samples + 1):
+        # for samples in range(2, max_samples + 1):
+        # for samples in range(max_samples, max_samples + 1):
+        samples = max_samples
+        while True:
             mlp_approximator = MlpApproximatorBuilder() \
                 .setInputNumber(input_number) \
                 .setHiddenLayerNumber(hidden_layer_number) \
                 .setOutputNumber(output_number) \
-                .setDebugMode(False) \
+                .setDebugMode(True) \
                 .build()
 
-            x = np.arange(samples).reshape([1, samples])
+            x = np.arange(samples).reshape([samples, 1]) * 2 * np.pi / samples
             inputs = np.ascontiguousarray(x, dtype=float)
-            f_x = lambda val: val - 100
+            f_x = lambda val: np.sin(val) + 1
+            # f_x = lambda val: val + 1
             outputs = f_x(inputs)
 
-            epoch_number = 100
+            # TODO (kaj): Fix lost learning ratio between on steps 53 54 55
+            #             * 53 quite possible
+            #             * 54 inverted values -> instead of growing values we have getting small x
+            #             * 55 quite possible
+            #             * 56 inverted
+            epoch_number = 10
+
             learned_outputs, metrics = mlp_approximator.train(
-                TestingSet(
-                    [inputs, outputs]),
+                TestingSet([inputs, outputs]),
                 epoch_number=epoch_number)
-            print(metrics.MeanSquaredErrors)
-            plt.plot(np.ascontiguousarray(np.arange(epoch_number)), metrics.MeanSquaredErrors[0], label='Correction Out1')
-            plt.xlabel('Epochs (Samples={})'.format(samples))
+
+            plt.plot(np.ascontiguousarray(np.arange(epoch_number)), metrics.MeanSquaredErrors[0],
+                     label='Mean Squared Error')
+            plt.xlabel('Epochs={} Samples={} HiddenNeurons={}'.format(epoch_number, samples, hidden_layer_number))
+            plt.ylim(0, 1.)
+            plt.legend()
+            plt.show()
+
+            plt.plot(outputs.T[0], label='Out')
+            plt.plot(learned_outputs.T[0], label='Approximation')
+            plt.xlabel('Epochs={} Samples={} HiddenNeurons={}'.format(epoch_number, samples, hidden_layer_number))
+            plt.ylim(0, max(outputs.T[0]))
             plt.legend()
             plt.show()
 
@@ -184,8 +208,10 @@ class TestMlpApproximator(TestCase):
             metrics.MeanSquaredErrors
             accepted_error_level = 0.4
             print('Out{}=\n{}\n\nErrorRatio=\n{}\n'
-                  .format(hidden_layer_number, learned_outputs, metrics.MeanSquaredErrors))
+                  .format(epoch_number, learned_outputs, metrics.MeanSquaredErrors))
 
             self.assertTrue(np.alltrue(accepted_error_level > metrics.MeanSquaredErrors),
-                            '\nOut{}=\n{}\nErrorRatio=\n{}\n'
-                            .format(hidden_layer_number, learned_outputs, metrics.MeanSquaredErrors))
+                            '\nOut=\n{}\nErrorRatio=\n{}\n'
+                            .format(learned_outputs, metrics.MeanSquaredErrors))
+
+            break

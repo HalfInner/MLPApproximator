@@ -1,5 +1,6 @@
 #  Copyright (c) 2020
 #  Kajetan Brzuszczak
+from copy import copy
 
 import numpy as np
 
@@ -11,7 +12,7 @@ class TestingSet:
     Second matrix shall contains OUTPUTS/Y
     """
     def __init__(self, data_set) -> None:
-        self.__data_set = data_set
+        self.__data_set = copy(data_set)
 
     @property
     def X(self):

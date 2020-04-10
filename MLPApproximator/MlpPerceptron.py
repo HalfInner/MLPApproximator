@@ -12,27 +12,35 @@ class Perceptron:
     """
 
     def __init__(self, input_number, output_number, activation_function=SigmoidActivationFunction(),
-                 debug_on=False, weight=None) -> None:
+                 debug_on=False, weight=None, name="Perceptron") -> None:
         self.__debug_on = debug_on
 
         self.__input_number = input_number
         self.__output_number = output_number
         self.__activation_function = activation_function
+        self.__name = name
+
+        self.__debug(' input number={}'.format(input_number))
+        self.__debug('output number={}'.format(output_number))
 
         if weight is None:
-            self.__weights = np.ones((output_number, input_number), dtype=float)
+            test_seed = 1
+            np.random.seed(test_seed)
+            self.__weights = np.random.randint(2, size=(output_number, input_number)) * 2 - 1
         else:
             self.__weights = weight
 
         self.__weights = self.__weights * 0.1
+        # self.__bias = np.zeros_like(self.__weights)
         required_shape = (output_number, input_number)
-        if self.__weights.shape != required_shape:
-            raise ValueError('Dimension of weights must meet requirements of input and output Expect={} Actual={}'
-                             .format(self.__weights.shape, required_shape))
+        # if self.__weights.shape != required_shape:
+        #     raise ValueError('Dimension of weights must meet requirements of input and output Expect={} Actual={}'
+        #                      .formatvd(self.__weights.shape, required_shape))
         self.__correction = None
         self.__delta_weights = None
 
-        self.__learning_ratio = 1.2
+        # self.__learning_ratio = 1.2
+        self.__learning_ratio = 0.5
 
         self.__output_data = np.zeros(shape=[3, 1])
         self.__mean_squared_error = None
@@ -62,9 +70,14 @@ class Perceptron:
         :param input_data:
         :return:
         """
-        self.__input_data = input_data
-        self.__debug('Input=\n{}\n\tWeights=\n{}'.format(input_data, self.__weights))
 
+        # self.__weights.resize(self.__output_number, input_data.shape[0])
+
+        self.__input_data = input_data
+        self.__debug('Input=\n{}'.format(input_data))
+        self.__debug('Weights=\n{}'.format(self.__weights))
+
+        # raw_output = (self.__weights + self.__bias) @ self.__input_data
         raw_output = self.__weights @ self.__input_data
         self.__debug('Raw Out=\n{}'.format(raw_output))
 
@@ -88,10 +101,13 @@ class Perceptron:
         step1 = expected_out - self.__output_data
         self.__calculateCorrectionAndWeights(step1)
 
-        mean_squared_error = np.mean(np.power(step1, 2), axis=1, keepdims=True)
-
+        # TODO(kaj): in another implementation they power up the mean -> not mean the power up
+        # mean_squared_error = np.mean(np.power(step1, 2), axis=1, keepdims=True)
+        mean_squared_error = np.sum(np.power(step1, 2), axis=0, keepdims=True)
+        old_weights = self.__weights
         # TODO(kaj): check dimension of 'correction' -> the length of it increasing alongside the samples number
         return self.__correction, self.__weights, mean_squared_error
+        # return self.__correction, old_weights, mean_squared_error
 
     def propagateHiddenBackward(self, next_correction, next_weight):
         """
@@ -118,14 +134,20 @@ class Perceptron:
         return self.__output_data
 
     def __calculateCorrectionAndWeights(self, step1):
-        step2 = np.ones_like(self.__output_data) - self.__output_data
+        # self.__bias -= self.__learning_ratio * step1
+
+        self.__debug('step1=\n{}'.format(step1))
+        step2 = 1. - self.__output_data
         self.__correction = step1 * step2 * self.__output_data
-        self.__debug('correction=\n{}'.format(self.__correction))
+        self.__debug('Correction=\n{}'.format(self.__correction))
+
         self.__delta_weights = self.__learning_ratio * self.__correction @ self.__input_data.transpose()
+
         self.__debug('Delta weights=\n{}'.format(self.__delta_weights))
+
         self.__weights = self.__weights + self.__delta_weights
         self.__debug('New Weights=\n{}'.format(self.__weights))
 
     def __debug(self, msg, *args):
         if self.__debug_on:
-            print('Perceptron: \n\t', msg, *args)
+            print('{:>12s}: '.format(self.__name), msg, *args)
