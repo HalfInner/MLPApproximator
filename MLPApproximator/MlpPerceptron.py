@@ -24,7 +24,7 @@ class Perceptron:
         self.__debug('output number={}'.format(output_number))
 
         if weight is None:
-            self.__weights = np.random.randn(output_number, input_number) * 0.5
+            self.__weights = np.random.randn(input_number, output_number) * 0.5
         else:
             self.__weights = weight
 
@@ -49,8 +49,7 @@ class Perceptron:
         self.__debug('Input=\n{}'.format(input_data))
         self.__debug('Weights=\n{}'.format(self.__weights))
 
-        # self.__raw_output = self.__input_data.dot(self.__weights.T)
-        self.__raw_output = self.__weights.dot(self.__input_data.T).T
+        self.__raw_output = self.__input_data.dot(self.__weights)
         self.__debug('Raw Out=\n{}'.format(self.__raw_output))
 
         self.__output_data = self.__activation_function.activate(self.__raw_output)
@@ -76,7 +75,6 @@ class Perceptron:
         mean_squared_error = np.power(np.sum(diff, axis=1, keepdims=True), 2)
         self.__calculateCorrectionAndWeights(diff)
 
-        old_weights = self.__weights
         # TODO(kaj): check dimension of 'correction' -> the length of it increasing alongside the samples number
         return self.__correction, self.__weights, mean_squared_error
 
@@ -87,9 +85,10 @@ class Perceptron:
         :param next_weight:
         :return:
         """
-        self.__debug('next_weight=\n{}'.format(next_weight))
-        self.__debug('next_correction=\n{}'.format(next_correction))
-        difference_increase = next_correction.dot(next_weight)
+        self.__debug('Curr weights=\n{}'.format(self.__weights))
+        self.__debug('Next weights=\n{}'.format(next_weight))
+        self.__debug('Next correction=\n{}'.format(next_correction))
+        difference_increase = next_correction.dot(next_weight.T)
         self.__calculateCorrectionAndWeights(difference_increase)
 
         return self.__correction, self.__weights
@@ -108,7 +107,7 @@ class Perceptron:
         self.__debug('Learning ratio=\n{}'.format(self.__learning_ratio))
         self.__debug('Correction=\n{}'.format(self.__correction))
         self.__debug('Input=\n{}'.format(self.__input_data))
-        self.__delta_weights = self.__learning_ratio * self.__correction.T.dot(self.__input_data)
+        self.__delta_weights = self.__learning_ratio * self.__input_data.T.dot(self.__correction)
 
         self.__debug('Delta weights=\n{}'.format(self.__delta_weights))
         self.__weights = self.__weights + self.__delta_weights

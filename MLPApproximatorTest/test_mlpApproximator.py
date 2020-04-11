@@ -156,7 +156,7 @@ class TestMlpApproximator(TestCase):
             but I am not sure this rule of thumb is proven.'
         """
 
-        max_samples = 2
+        max_samples = 3
         input_number = output_number = 1
         hidden_layer_number = 2
 
@@ -215,4 +215,3 @@ class TestMlpApproximator(TestCase):
             self.assertTrue(np.alltrue(accepted_error_level > metrics.MeanSquaredErrors),
                             '\nOut=\n{}\nErrorRatio=\n{}\n'
                             .format(learned_outputs, metrics.MeanSquaredErrors))
-
