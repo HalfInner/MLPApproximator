@@ -24,19 +24,17 @@ class Perceptron:
         self.__debug('output number={}'.format(output_number))
 
         if weight is None:
-            test_seed = 1
-            np.random.seed(test_seed)
-            self.__weights = np.random.randn(output_number, input_number) * 0.1
+            self.__weights = np.random.randn(output_number, input_number) * 0.5
         else:
             self.__weights = weight
 
         required_shape = (output_number, input_number)
-        self.__gradient = None
         self.__delta_weights = None
 
-        self.__learning_ratio = 0.5
+        self.__learning_ratio = 1
 
-        self.__output_data = np.zeros(shape=[3, 1])
+        self.__raw_output = np.zeros(shape=[3, 1])
+        self.__output_data = np.zeros_like(self.__raw_output)
         self.__mean_squared_error = None
         self.__input_data = None
 
@@ -51,10 +49,11 @@ class Perceptron:
         self.__debug('Input=\n{}'.format(input_data))
         self.__debug('Weights=\n{}'.format(self.__weights))
 
-        raw_output = self.__input_data @ self.__weights.T
-        self.__debug('Raw Out=\n{}'.format(raw_output))
+        # self.__raw_output = self.__input_data.dot(self.__weights.T)
+        self.__raw_output = self.__weights.dot(self.__input_data.T).T
+        self.__debug('Raw Out=\n{}'.format(self.__raw_output))
 
-        self.__output_data = self.__activation_function.activate(raw_output)
+        self.__output_data = self.__activation_function.activate(self.__raw_output)
         self.__debug('Activated Out=\n{}'.format(self.__output_data))
 
         return self.__output_data
@@ -66,16 +65,17 @@ class Perceptron:
         :param expected_out:
         :return:
         """
-        if not expected_out.shape == self.__output_data.shape:
-            raise ValueError("Shape of validator must be same as the output")
+        # if not expected_out.shape == self.__output_data.shape:
+        #     raise ValueError("Shape of validator must be same as the output")
 
         self.__debug('ExpectedOut=\n{}'.format(expected_out))
         self.__debug('Out=\n{}'.format(self.__output_data))
-        step1 = expected_out - self.__output_data
-        self.__calculateCorrectionAndWeights(step1)
-
+        diff = expected_out - self.__output_data
         # TODO(kaj): in another implementation they power up the mean -> not mean the power up
-        mean_squared_error = np.mean(np.power(step1, 2), axis=0, keepdims=True)
+        # TODO(kaj): this shall be moved into forward propagation
+        mean_squared_error = np.power(np.sum(diff, axis=1, keepdims=True), 2)
+        self.__calculateCorrectionAndWeights(diff)
+
         old_weights = self.__weights
         # TODO(kaj): check dimension of 'correction' -> the length of it increasing alongside the samples number
         return self.__correction, self.__weights, mean_squared_error
@@ -89,10 +89,10 @@ class Perceptron:
         """
         self.__debug('next_weight=\n{}'.format(next_weight))
         self.__debug('next_correction=\n{}'.format(next_correction))
-        difference_increase = next_correction @ next_weight
+        difference_increase = next_correction.dot(next_weight)
         self.__calculateCorrectionAndWeights(difference_increase)
 
-        return self.__gradient, self.__weights
+        return self.__correction, self.__weights
 
     def output(self) -> np.array:
         """
@@ -108,7 +108,7 @@ class Perceptron:
         self.__debug('Learning ratio=\n{}'.format(self.__learning_ratio))
         self.__debug('Correction=\n{}'.format(self.__correction))
         self.__debug('Input=\n{}'.format(self.__input_data))
-        self.__delta_weights = self.__learning_ratio * self.__correction.T @ self.__input_data
+        self.__delta_weights = self.__learning_ratio * self.__correction.T.dot(self.__input_data)
 
         self.__debug('Delta weights=\n{}'.format(self.__delta_weights))
         self.__weights = self.__weights + self.__delta_weights

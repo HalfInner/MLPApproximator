@@ -25,7 +25,7 @@ class MlpApproximator:
         """
         self.__debug_on = debug_on
 
-        self.__bias_number = 0
+        self.__bias_number = 1
         self.__input_number = input_number
         self.__output_number = output_number
 
@@ -56,8 +56,9 @@ class MlpApproximator:
 
         normalized_train_data_input = self.__normalize_data_input(train_data_set.Input)
         # TODO(kaj): Preceptron's responsibility
-        # normalized_train_data_input = np.append(normalized_train_data_input,
-        #                                         np.ones(shape=(1, normalized_train_data_input.shape[1])), axis=0)
+        normalized_train_data_input = np.append(
+            normalized_train_data_input, -np.ones(shape=(normalized_train_data_input.shape[0], 1)), axis=1)
+
         normalized_train_data_output = self.__normalize_data_output(train_data_set.Output)
 
         metrics = MLPMetrics()

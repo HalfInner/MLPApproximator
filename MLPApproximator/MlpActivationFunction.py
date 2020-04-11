@@ -15,10 +15,12 @@ class SigmoidActivationFunction:
     def __call__(self, val) -> float:
         return self.activate(val)
 
-    def activate(self, val):
+    def activate(self, val: np.array):
         return 1. / (1. + np.exp(-val))
 
-    def differentiate(self, diff, val):
+    def differentiate(self, diff: np.array, val: np.array) -> np.array:
+        if diff.shape != val.shape:
+            raise ValueError('Diff shape={} must be same as Val shape={}'.format(diff.shape, val.shape))
         act = self.activate(val)
         return diff * act * (1 - act)
 

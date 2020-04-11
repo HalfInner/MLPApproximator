@@ -146,6 +146,8 @@ class TestMlpApproximator(TestCase):
                             .format(hidden_layer_number, out_epoch, delta_expected, error_ratio))
 
     def test_shouldLearnWhenIncreasedNumberOfSamples(self):
+        test_seed = 1
+        np.random.seed(test_seed)
         """
         Description must be
 
@@ -154,14 +156,14 @@ class TestMlpApproximator(TestCase):
             but I am not sure this rule of thumb is proven.'
         """
 
-        max_samples = 3
+        max_samples = 2
         input_number = output_number = 1
-        hidden_layer_number = 4
+        hidden_layer_number = 2
 
         # for samples in range(2, max_samples + 1):
         # for samples in range(max_samples, max_samples + 1):
         samples = max_samples
-        while True:
+        if True:
             mlp_approximator = MlpApproximatorBuilder() \
                 .setInputNumber(input_number) \
                 .setHiddenLayerNumber(hidden_layer_number) \
@@ -169,9 +171,9 @@ class TestMlpApproximator(TestCase):
                 .setDebugMode(True) \
                 .build()
 
-            x = np.arange(samples).reshape([samples, 1]) * 2 * np.pi / samples
+            x = np.arange(samples).reshape([samples, 1]) * np.pi / samples
             inputs = np.ascontiguousarray(x, dtype=float)
-            f_x = lambda val: np.sin(val) + 1
+            f_x = lambda val: np.sin(val) + 0.5
             # f_x = lambda val: val + 1
             outputs = f_x(inputs)
 
@@ -180,7 +182,7 @@ class TestMlpApproximator(TestCase):
             #             * 54 inverted values -> instead of growing values we have getting small x
             #             * 55 quite possible
             #             * 56 inverted
-            epoch_number = 100
+            epoch_number = 200
 
             learned_outputs, metrics = mlp_approximator.train(
                 TestingSet([inputs, outputs]),
@@ -189,7 +191,7 @@ class TestMlpApproximator(TestCase):
             plt.plot(np.ascontiguousarray(np.arange(epoch_number)), metrics.MeanSquaredErrors[0], 'x-',
                      label='Mean Squared Error')
             plt.xlabel('Epochs={} Samples={} HiddenNeurons={}'.format(epoch_number, samples, hidden_layer_number))
-            plt.ylim(0, 1.1)
+            plt.ylim(0, np.max(metrics.MeanSquaredErrors[0]) * 1.1)
             plt.legend()
             plt.show()
 
@@ -214,4 +216,3 @@ class TestMlpApproximator(TestCase):
                             '\nOut=\n{}\nErrorRatio=\n{}\n'
                             .format(learned_outputs, metrics.MeanSquaredErrors))
 
-            break
