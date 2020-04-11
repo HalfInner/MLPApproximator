@@ -28,4 +28,5 @@ class MLPMetrics:
             self.__mean_squared_errors = mean_squared_error
             return
 
-        self.__mean_squared_errors = np.append(self.__mean_squared_errors, mean_squared_error, axis=1)
+        # self.__mean_squared_errors = np.append(self.__mean_squared_errors, mean_squared_error, axis=1)
+        self.__mean_squared_errors = np.append(self.__mean_squared_errors, mean_squared_error)

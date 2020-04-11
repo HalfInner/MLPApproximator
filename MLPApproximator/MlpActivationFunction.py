@@ -22,10 +22,10 @@ class SigmoidActivationFunction:
         if diff.shape != val.shape:
             raise ValueError('Diff shape={} must be same as Val shape={}'.format(diff.shape, val.shape))
         act = self.activate(val)
-        return diff * act * (1 - act)
+        return diff * (act * (1. - act))
 
 
-class TanhActivationFunction:
+class ReluActivationFunction:
     """
     Threshold function for the output
     """
@@ -34,7 +34,14 @@ class TanhActivationFunction:
         super().__init__()
 
     def __call__(self, val) -> float:
-        return self.__activate(val)
+        return self.activate(val)
 
-    def __activate(self, val):
-        return np.tanh(val)
+    def activate(self, val: np.array):
+        return np.maximum(0., val)
+
+    def differentiate(self, diff: np.array, val: np.array) -> np.array:
+        if diff.shape != val.shape:
+            raise ValueError('Diff shape={} must be same as Val shape={}'.format(diff.shape, val.shape))
+        out = np.copy(diff * val)
+        return np.where(out <= 0, 0, 1)
+

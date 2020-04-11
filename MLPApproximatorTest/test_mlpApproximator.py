@@ -177,18 +177,15 @@ class TestMlpApproximator(TestCase):
             # f_x = lambda val: val + 1
             outputs = f_x(inputs)
 
-            # TODO (kaj): Fix lost learning ratio between on steps 53 54 55
-            #             * 53 quite possible
-            #             * 54 inverted values -> instead of growing values we have getting small x
-            #             * 55 quite possible
-            #             * 56 inverted
-            epoch_number = 200
+            epoch_number = 2000
 
             learned_outputs, metrics = mlp_approximator.train(
                 TestingSet([inputs, outputs]),
                 epoch_number=epoch_number)
 
-            plt.plot(np.ascontiguousarray(np.arange(epoch_number)), metrics.MeanSquaredErrors[0], 'x-',
+            # plt.plot(np.ascontiguousarray(np.arange(epoch_number)), metrics.MeanSquaredErrors[0], 'x',
+            #          label='Mean Squared Error')
+            plt.plot(np.ascontiguousarray(np.arange(epoch_number)), metrics.MeanSquaredErrors, 'x',
                      label='Mean Squared Error')
             plt.xlabel('Epochs={} Samples={} HiddenNeurons={}'.format(epoch_number, samples, hidden_layer_number))
             plt.ylim(0, np.max(metrics.MeanSquaredErrors[0]) * 1.1)
@@ -196,7 +193,7 @@ class TestMlpApproximator(TestCase):
             plt.show()
 
             plt.plot(outputs.T[0], 'x-', label='Out')
-            plt.plot(learned_outputs.T[0], 'x-', label='Approximation')
+            plt.plot(learned_outputs[0], 'x-', label='Approximation')
             plt.xlabel('Epochs={} Samples={} HiddenNeurons={}'.format(epoch_number, samples, hidden_layer_number))
             plt.ylim(0, max(outputs.T[0]) + 1.1)
             plt.legend()

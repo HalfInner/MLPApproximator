@@ -64,18 +64,23 @@ class MlpApproximator:
         metrics = MLPMetrics()
         for epoch in range(epoch_number):
             self.__debug('Current epoch: ', epoch)
-            self.__debug('Forward Propagation')
-            self.__output = self.propagateForward(normalized_train_data_input)
-            # self.__output = self.propagateForward(train_data_set.Input)
 
-            self.__debug('Backward Error Propagation')
-            correction, mean_squared_error = self.propagateErrorBackward(normalized_train_data_output)
+            epoch_output = np.array([[]])
+            epoch_mse = np.array([[]])
+            for normalized_input, normalized_output in zip(normalized_train_data_input, normalized_train_data_output):
+                self.__debug('Forward Propagation')
+                cur_output = self.propagateForward(normalized_input.reshape(1, -1))
+                epoch_output = np.append(epoch_output, cur_output, axis=1)
 
-            metrics.addCorrection(correction)
-            metrics.addMeanSquaredError(mean_squared_error)
+                self.__debug('Backward Error Propagation')
+                correction, mean_squared_error = self.propagateErrorBackward(normalized_output)
+                epoch_mse = np.append(epoch_mse, mean_squared_error.reshape(1, -1))
+
+            # metrics.addCorrection(correction)
+            metrics.addMeanSquaredError(np.array([np.mean(epoch_mse)]))
 
         self.__debug('Current denormalized output ', self.__p2.output())
-        self.__output = self.__denormalize_output(self.__p2.output())
+        self.__output = self.__denormalize_output(epoch_output)
         return self.__output, metrics
 
     def test(self, test_data_set):  # TODO (kaj): Begin with training the neural network
