@@ -25,7 +25,7 @@ class MlpApproximator:
         """
         self.__debug_on = debug_on
 
-        self.__bias_number = 0
+        self.__bias_number = 1
         self.__input_number = input_number
         self.__output_number = output_number
 
@@ -54,27 +54,33 @@ class MlpApproximator:
         if epoch_number <= 0:
             raise RuntimeError('Epoch must be at least one')
 
-        normalized_train_data_input = self.__normalize_data_input(train_data_set.Input)
+        # normalized_train_data_input = self.__normalize_data_input(train_data_set.Input)
         # TODO(kaj): Preceptron's responsibility
-        # normalized_train_data_input = np.append(normalized_train_data_input,
-        #                                         np.ones(shape=(1, normalized_train_data_input.shape[1])), axis=0)
-        normalized_train_data_output = self.__normalize_data_output(train_data_set.Output)
+        # normalized_train_data_input = np.append(
+        #     normalized_train_data_input, -np.ones(shape=(normalized_train_data_input.shape[0], 1)), axis=1)
+        if self.__bias_number > 0:
+            inputs_with_bias = np.append(
+                train_data_set.Input,
+                np.ones(shape=(train_data_set.Input.shape[0], self.__bias_number)),
+                axis=1)
 
         metrics = MLPMetrics()
         for epoch in range(epoch_number):
+            self.__debug('################################################')
             self.__debug('Current epoch: ', epoch)
+            self.__debug('################################################')
             self.__debug('Forward Propagation')
-            self.__output = self.propagateForward(normalized_train_data_input)
-            # self.__output = self.propagateForward(train_data_set.Input)
+            self.__output = self.propagateForward(inputs_with_bias)
 
             self.__debug('Backward Error Propagation')
-            correction, mean_squared_error = self.propagateErrorBackward(normalized_train_data_output)
+            correction, mean_squared_error = self.propagateErrorBackward(train_data_set.Output)
 
             metrics.addCorrection(correction)
             metrics.addMeanSquaredError(mean_squared_error)
 
         self.__debug('Current denormalized output ', self.__p2.output())
-        self.__output = self.__denormalize_output(self.__p2.output())
+        # self.__output = self.__denormalize_output(self.__p2.output())
+        self.__output = self.__p2.output()
         return self.__output, metrics
 
     def test(self, test_data_set):  # TODO (kaj): Begin with training the neural network

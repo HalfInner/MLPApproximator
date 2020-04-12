@@ -13,10 +13,13 @@ class SigmoidActivationFunction:
         super().__init__()
 
     def __call__(self, val) -> float:
-        return self.__activate(val)
+        return self.activate(val)
 
-    def __activate(self, val):
+    def activate(self, val: np.array):
         return 1. / (1. + np.exp(-val))
+
+    def differentiate(self, val: np.array) -> np.array:
+        return self.activate(val) * (1. - self.activate(val))
 
 
 class TanhActivationFunction:
@@ -30,5 +33,8 @@ class TanhActivationFunction:
     def __call__(self, val) -> float:
         return self.__activate(val)
 
-    def __activate(self, val):
+    def activate(self, val: np.array):
         return np.tanh(val)
+
+    def differentiate(self, val: np.array) -> np.array:
+        return 1 - self.activate(val) ** 2

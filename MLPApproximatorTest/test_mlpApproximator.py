@@ -1,10 +1,14 @@
 #  Copyright (c) 2020
 #  Kajetan Brzuszczak
+from contextlib import redirect_stdout
 from unittest import TestCase
 
 import numpy as np
+from keras import Sequential
+from keras.layers import Dense
 from matplotlib import pyplot as plt
 
+from MLPApproximator.MlpActivationFunction import TanhActivationFunction, SigmoidActivationFunction
 from MLPApproximator.MlpApproximatorBuilder import MlpApproximatorBuilder
 from MLPApproximator.MlpFunctionGenerator import TestingSet
 
@@ -146,6 +150,65 @@ class TestMlpApproximator(TestCase):
                             .format(hidden_layer_number, out_epoch, delta_expected, error_ratio))
 
     def test_shouldLearnWhenIncreasedNumberOfSamples(self):
+        test_seed = 1
+        np.random.seed(test_seed)
+        """
+        Description must be
+
+        Noteworthy quote:
+            'Normally in my lab the ideal node is around 2 * input * output + 1, e.g., 5-21-2 or 5-11-1,
+            but I am not sure this rule of thumb is proven.'
+        """
+        for max_samples in range(20, 21):
+            # max_samples = 50
+            input_number = output_number = 1
+            hidden_layer_number = 37
+            epoch_number = 10
+
+            samples = max_samples
+            x = np.arange(samples).reshape([samples, 1]) * 2 * np.pi / samples
+            inputs = np.ascontiguousarray(x, dtype=float)
+            f_x = lambda val: np.sin(val) + 2.
+            outputs = f_x(inputs) * 0.30
+            inputs = inputs / np.max(inputs)
+
+            path = 'C:\\Users\\kajbr\\OneDrive\\Dokumenty\\StudyTmp\\'
+            with open('{}Out{:03}.txt'.format(path, max_samples), 'w') as f, redirect_stdout(f):
+
+                mlp_approximator = MlpApproximatorBuilder() \
+                    .setInputNumber(input_number) \
+                    .setHiddenLayerNumber(hidden_layer_number) \
+                    .setOutputNumber(output_number) \
+                    .setActivationFunctionForHiddenLayer(TanhActivationFunction()) \
+                    .setActivationFunctionForOutputLayer(SigmoidActivationFunction()) \
+                    .setDebugMode(True) \
+                    .build()
+
+                learned_outputs, metrics = mlp_approximator.train(
+                    TestingSet([inputs, outputs]),
+                    epoch_number=epoch_number)
+
+                plt.plot(np.ascontiguousarray(np.arange(epoch_number)), metrics.MeanSquaredErrors[0], '-',
+                         label='Mean Squared Error')
+                plt.xlabel('Epochs={} Samples={} HiddenNeurons={}'.format(epoch_number, samples, hidden_layer_number))
+                plt.ylim(0, np.max(metrics.MeanSquaredErrors[0]) * 1.1)
+                plt.legend()
+                # plt.show()
+                plt.savefig('{}{:03}MSE.png'.format(path, max_samples))
+                plt.cla()
+
+                plt.plot(outputs.T[0], 'bo', label='True')
+                plt.plot(learned_outputs.T[0], 'ro-', label='Predicted')
+                plt.xlabel('Epochs={} Samples={} HiddenNeurons={}'.format(epoch_number, samples, hidden_layer_number))
+                plt.ylim(-0., 1.)
+                plt.legend()
+                # plt.show()
+                plt.savefig('{}{:03}ACC.png'.format(path, max_samples))
+                plt.cla()
+
+    def test_shouldKeras(self):
+        test_seed = 1
+        np.random.seed(test_seed)
         """
         Description must be
 
@@ -154,64 +217,53 @@ class TestMlpApproximator(TestCase):
             but I am not sure this rule of thumb is proven.'
         """
 
-        max_samples = 4
-        input_number = output_number = max_samples
-        hidden_layer_number = 3
+        max_samples = 50
+        input_number = output_number = 1
+        hidden_layer_number = 100
+        epoch_number = 50
 
-        # for samples in range(2, max_samples + 1):
-        # for samples in range(max_samples, max_samples + 1):
         samples = max_samples
-        while True:
-            mlp_approximator = MlpApproximatorBuilder() \
-                .setInputNumber(input_number) \
-                .setHiddenLayerNumber(hidden_layer_number) \
-                .setOutputNumber(output_number) \
-                .setDebugMode(True) \
-                .build()
+        x = np.arange(samples).reshape([samples, 1]) * 2 * np.pi / samples
+        inputs = np.ascontiguousarray(x, dtype=float)
+        f_x = lambda val: np.sin(val) + 2.
+        outputs = f_x(inputs) * 0.30
+        # inputs = np.array([[1], [0], [-1]])
+        # outputs = np.array([[1], [0], [0]])
 
-            x = np.arange(samples).reshape([samples, 1]) * 2 * np.pi / samples
-            inputs = np.ascontiguousarray(x, dtype=float)
-            f_x = lambda val: np.sin(val) + 1
-            # f_x = lambda val: val + 1
-            outputs = f_x(inputs)
+        if True:
+            # the data, split between train and test sets
+            x_train = inputs
+            y_train = outputs
 
-            # TODO (kaj): Fix lost learning ratio between on steps 53 54 55
-            #             * 53 quite possible
-            #             * 54 inverted values -> instead of growing values we have getting small x
-            #             * 55 quite possible
-            #             * 56 inverted
-            epoch_number = 10
+            model = Sequential()
+            model.add(Dense(hidden_layer_number, activation='tanh', input_dim=input_number))
+            model.add(Dense(output_number, activation='sigmoid'))
+            model.summary()
+            model.compile(loss='mae', optimizer='rmsprop', metrics=['accuracy'])
 
-            learned_outputs, metrics = mlp_approximator.train(
-                TestingSet([inputs, outputs]),
-                epoch_number=epoch_number)
+            history = model.fit(x_train, y_train,
+                                batch_size=max_samples,
+                                epochs=epoch_number,
+                                verbose=1,
+                                validation_split=0.1)
 
-            plt.plot(np.ascontiguousarray(np.arange(epoch_number)), metrics.MeanSquaredErrors[0], 'x-',
+            print('KEARS: history:\n', history.history['loss'])
+            plt.plot(np.ascontiguousarray(np.arange(epoch_number)), history.history['loss'], 'x-',
                      label='Mean Squared Error')
-            plt.xlabel('Epochs={} Samples={} HiddenNeurons={}'.format(epoch_number, samples, hidden_layer_number))
-            plt.ylim(0, 1.1)
+            plt.xlabel(
+                'KERAS: Epochs={} Samples={} HiddenNeurons={}'.format(epoch_number, samples, hidden_layer_number))
             plt.legend()
+            plt.ylim(0, np.max(history.history['loss']) * 1.1)
             plt.show()
 
-            plt.plot(outputs.T[0], 'x-', label='Out')
-            plt.plot(learned_outputs.T[0], 'x-', label='Approximation')
-            plt.xlabel('Epochs={} Samples={} HiddenNeurons={}'.format(epoch_number, samples, hidden_layer_number))
-            plt.ylim(0, max(outputs.T[0]))
+            predicates = model.predict(inputs)
+
+            print('KEARS: outputs:\n', outputs)
+            print('KEARS: predicted:\n', predicates)
+            plt.plot(inputs, outputs, 'bo', label="True")
+            plt.plot(inputs, predicates, 'ro', label="Predicted")
+            plt.xlabel(
+                'KERAS: Epochs={} Samples={} HiddenNeurons={}'.format(epoch_number, samples, hidden_layer_number))
             plt.legend()
+            plt.ylim(0, 1.)
             plt.show()
-
-            have_same_signs = outputs * learned_outputs >= 0.0
-            self.assertTrue(np.alltrue(have_same_signs),
-                            '\nOut{}. All fields must have same sign\n{}'
-                            .format(hidden_layer_number, have_same_signs))
-
-            metrics.MeanSquaredErrors
-            accepted_error_level = 0.4
-            print('Out{}=\n{}\n\nErrorRatio=\n{}\n'
-                  .format(epoch_number, learned_outputs, metrics.MeanSquaredErrors))
-
-            self.assertTrue(np.alltrue(accepted_error_level > metrics.MeanSquaredErrors),
-                            '\nOut=\n{}\nErrorRatio=\n{}\n'
-                            .format(learned_outputs, metrics.MeanSquaredErrors))
-
-            break
