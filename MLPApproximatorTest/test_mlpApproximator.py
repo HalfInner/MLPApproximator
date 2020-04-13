@@ -162,19 +162,20 @@ class TestMlpApproximator(TestCase):
         for max_samples in range(20, 21):
             # max_samples = 50
             input_number = output_number = 1
-            hidden_layer_number = 37
-            epoch_number = 10
+            hidden_layer_number = 80
+            epoch_number = 10000
 
             samples = max_samples
-            x = np.arange(samples).reshape([samples, 1]) * 2 * np.pi / samples
+            x = np.arange(samples).reshape([samples, 1]) * 2 * np.pi / samples - np.pi
             inputs = np.ascontiguousarray(x, dtype=float)
-            f_x = lambda val: np.sin(val) + 2.
-            outputs = f_x(inputs) * 0.30
-            inputs = inputs / np.max(inputs)
+            # f_x = lambda val: np.sin(val) + 2.
+            f_x = lambda x_in: (1 / 20) * (x_in + 4) * (x_in + 2) * (x_in + 1) * (x_in - 1) * (x_in - 3) + 2
+            outputs = f_x(inputs)
+            outputs = (outputs - np.min(outputs)) / np.ptp(outputs)
+            inputs = (inputs - np.min(inputs)) / np.ptp(inputs)
 
             path = 'C:\\Users\\kajbr\\OneDrive\\Dokumenty\\StudyTmp\\'
             with open('{}Out{:03}.txt'.format(path, max_samples), 'w') as f, redirect_stdout(f):
-
                 mlp_approximator = MlpApproximatorBuilder() \
                     .setInputNumber(input_number) \
                     .setHiddenLayerNumber(hidden_layer_number) \
@@ -188,23 +189,23 @@ class TestMlpApproximator(TestCase):
                     TestingSet([inputs, outputs]),
                     epoch_number=epoch_number)
 
-                plt.plot(np.ascontiguousarray(np.arange(epoch_number)), metrics.MeanSquaredErrors[0], '-',
+                plt.plot(np.ascontiguousarray(np.arange(epoch_number)), metrics.MeanSquaredErrors[0], 'x-',
                          label='Mean Squared Error')
                 plt.xlabel('Epochs={} Samples={} HiddenNeurons={}'.format(epoch_number, samples, hidden_layer_number))
                 plt.ylim(0, np.max(metrics.MeanSquaredErrors[0]) * 1.1)
                 plt.legend()
-                # plt.show()
-                plt.savefig('{}{:03}MSE.png'.format(path, max_samples))
-                plt.cla()
+                plt.show()
+                # plt.savefig('{}{:03}MSE.png'.format(path, max_samples))
+                # plt.cla()
 
-                plt.plot(outputs.T[0], 'bo', label='True')
-                plt.plot(learned_outputs.T[0], 'ro-', label='Predicted')
+                plt.plot(inputs.T[0], outputs.T[0], 'bo', label='True')
+                plt.plot(inputs.T[0], learned_outputs.T[0], 'ro-', label='Predicted')
                 plt.xlabel('Epochs={} Samples={} HiddenNeurons={}'.format(epoch_number, samples, hidden_layer_number))
                 plt.ylim(-0., 1.)
                 plt.legend()
-                # plt.show()
-                plt.savefig('{}{:03}ACC.png'.format(path, max_samples))
-                plt.cla()
+                plt.show()
+                # plt.savefig('{}{:03}ACC.png'.format(path, max_samples))
+                # plt.cla()
 
     def test_shouldKeras(self):
         test_seed = 1
@@ -220,15 +221,17 @@ class TestMlpApproximator(TestCase):
         max_samples = 50
         input_number = output_number = 1
         hidden_layer_number = 100
-        epoch_number = 50
+        epoch_number = 10000
 
         samples = max_samples
         x = np.arange(samples).reshape([samples, 1]) * 2 * np.pi / samples
+        x = x - np.pi
         inputs = np.ascontiguousarray(x, dtype=float)
-        f_x = lambda val: np.sin(val) + 2.
-        outputs = f_x(inputs) * 0.30
-        # inputs = np.array([[1], [0], [-1]])
-        # outputs = np.array([[1], [0], [0]])
+        # f_x = lambda val: -0.1 * val ** 2 + (1 / 10) * val ** 3.
+        f_x = lambda x_in: (1 / 20) * (x_in + 4) * (x_in + 2) * (x_in + 1) * (x_in - 1) * (x_in - 3) + 2
+        outputs = f_x(inputs)
+        outputs = (outputs - np.min(outputs)) / np.ptp(outputs)
+        inputs = (inputs - np.min(inputs)) / np.ptp(inputs)
 
         if True:
             # the data, split between train and test sets
@@ -239,7 +242,7 @@ class TestMlpApproximator(TestCase):
             model.add(Dense(hidden_layer_number, activation='tanh', input_dim=input_number))
             model.add(Dense(output_number, activation='sigmoid'))
             model.summary()
-            model.compile(loss='mae', optimizer='rmsprop', metrics=['accuracy'])
+            model.compile(loss='mae', optimizer='rmsprop', metrics=['mean_squared_error'])
 
             history = model.fit(x_train, y_train,
                                 batch_size=max_samples,
@@ -247,8 +250,8 @@ class TestMlpApproximator(TestCase):
                                 verbose=1,
                                 validation_split=0.1)
 
-            print('KEARS: history:\n', history.history['loss'])
-            plt.plot(np.ascontiguousarray(np.arange(epoch_number)), history.history['loss'], 'x-',
+            print('KEARS: history:\n', history.history['mean_squared_error'])
+            plt.plot(np.ascontiguousarray(np.arange(epoch_number)), history.history['mean_squared_error'], 'x-',
                      label='Mean Squared Error')
             plt.xlabel(
                 'KERAS: Epochs={} Samples={} HiddenNeurons={}'.format(epoch_number, samples, hidden_layer_number))
