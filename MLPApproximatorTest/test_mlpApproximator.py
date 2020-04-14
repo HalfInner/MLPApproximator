@@ -164,7 +164,7 @@ class TestMlpApproximator(TestCase):
             max_samples = 100
             input_number = output_number = 1
             hidden_layer_number = 80
-            epoch_number = 30000
+            epoch_number = 1000
 
             samples = max_samples
             x = np.arange(samples).reshape([samples, 1]) * 2 * np.pi / samples - np.pi
@@ -190,7 +190,7 @@ class TestMlpApproximator(TestCase):
                     TestingSet([inputs, outputs]),
                     epoch_number=epoch_number)
 
-                plt.plot(np.ascontiguousarray(np.arange(epoch_number)), metrics.MeanSquaredErrors[0], 'x-',
+                plt.plot(np.ascontiguousarray(np.arange(epoch_number)), metrics.MeanSquaredErrors[0], '-',
                          label='Mean Squared Error')
                 plt.xlabel('Epochs={} Samples={} HiddenNeurons={}'.format(epoch_number, samples, hidden_layer_number))
                 plt.ylim(0, np.max(metrics.MeanSquaredErrors[0]) * 1.1)
@@ -199,8 +199,8 @@ class TestMlpApproximator(TestCase):
                 # plt.savefig('{}{:03}MSE.png'.format(path, max_samples))
                 # plt.cla()
 
-                plt.plot(inputs.T[0], outputs.T[0], 'bo', label='True')
-                plt.plot(inputs.T[0], learned_outputs.T[0], 'ro-', label='Predicted')
+                plt.plot(inputs.T[0], outputs.T[0], 'b.', label='True')
+                plt.plot(inputs.T[0], learned_outputs.T[0], 'r.', label='Predicted')
                 plt.xlabel('Epochs={} Samples={} HiddenNeurons={}'.format(epoch_number, samples, hidden_layer_number))
                 plt.ylim(-0., 1.)
                 plt.legend()
