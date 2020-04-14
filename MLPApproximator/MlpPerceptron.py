@@ -78,7 +78,7 @@ class Perceptron:
         mean_squared_error = np.mean(0.5 * np.square(diff), axis=-1, keepdims=True)
         # Todo(kaj): pochodna funkcji " 2x"
         # self.__calculateCorrectionAndWeights(diff * 2)
-        self.__calculateCorrectionAndWeights(diff)
+        self.__calculateCorrectionAndWeights(diff / 2)
 
         # TODO(kaj): check dimension of 'correction' -> the length of it increasing alongside the samples number
         return self.__correction, self.__weights, mean_squared_error
@@ -94,7 +94,7 @@ class Perceptron:
         self.__debug('Next weights=\n{}'.format(next_weight))
         self.__debug('Next correction=\n{}'.format(next_correction))
         difference_increase = next_correction.dot(next_weight.T)
-        self.__calculateCorrectionAndWeights(2 * difference_increase)
+        self.__calculateCorrectionAndWeights(4 * difference_increase)
 
         return self.__correction, self.__weights
 
