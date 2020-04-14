@@ -94,7 +94,7 @@ class Perceptron:
         self.__debug('Next weights=\n{}'.format(next_weight))
         self.__debug('Next correction=\n{}'.format(next_correction))
         difference_increase = next_correction.dot(next_weight.T)
-        self.__calculateCorrectionAndWeights(difference_increase*4)
+        self.__calculateCorrectionAndWeights(difference_increase * 2)
 
         return self.__correction, self.__weights
 

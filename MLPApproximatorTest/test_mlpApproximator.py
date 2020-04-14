@@ -159,11 +159,12 @@ class TestMlpApproximator(TestCase):
             'Normally in my lab the ideal node is around 2 * input * output + 1, e.g., 5-21-2 or 5-11-1,
             but I am not sure this rule of thumb is proven.'
         """
-        for max_samples in range(20, 21):
-            # max_samples = 50
+        # for max_samples in range(20, 21):
+        if True:
+            max_samples = 50
             input_number = output_number = 1
             hidden_layer_number = 80
-            epoch_number = 10000
+            epoch_number = 3000
 
             samples = max_samples
             x = np.arange(samples).reshape([samples, 1]) * 2 * np.pi / samples - np.pi
