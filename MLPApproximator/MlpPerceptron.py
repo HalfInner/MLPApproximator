@@ -31,7 +31,7 @@ class Perceptron:
         required_shape = (output_number, input_number)
         self.__delta_weights = None
 
-        self.__learning_ratio = 0.1
+        self.__learning_ratio = 0.02
 
         self.__raw_output = np.zeros(shape=[3, 1])
         self.__output_data = np.zeros_like(self.__raw_output)
@@ -75,7 +75,7 @@ class Perceptron:
         # mean_squared_error = np.array([[np.power(np.sum(diff), 2)]])
         # mean_squared_error = mean_squared_error / np.max(mean_squared_error)
         # mean_squared_error = np.array([[np.mean(np.array(np.power(np.sum(diff), 2)))]])
-        mean_squared_error = np.power(np.mean(diff, axis=-1, keepdims=True), 2)
+        mean_squared_error = np.mean(0.5 * np.square(diff), axis=-1, keepdims=True)
         # Todo(kaj): pochodna funkcji " 2x"
         # self.__calculateCorrectionAndWeights(diff * 2)
         self.__calculateCorrectionAndWeights(diff)
@@ -94,7 +94,7 @@ class Perceptron:
         self.__debug('Next weights=\n{}'.format(next_weight))
         self.__debug('Next correction=\n{}'.format(next_correction))
         difference_increase = next_correction.dot(next_weight.T)
-        self.__calculateCorrectionAndWeights(difference_increase * 2)
+        self.__calculateCorrectionAndWeights(2 * difference_increase)
 
         return self.__correction, self.__weights
 
@@ -105,7 +105,7 @@ class Perceptron:
         """
         return self.__output_data
 
-    def __calculateCorrectionAndWeights(self, difference_increase):
+    def __calculateCorrectionAndWeights(self, difference_increase: np.array):
         self.__debug('difference_increase=\n{}'.format(difference_increase))
         derivation = self.__activation_function.differentiate(self.__raw_output)
         self.__correction = derivation * difference_increase
