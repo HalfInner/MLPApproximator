@@ -75,7 +75,7 @@ class Perceptron:
         # mean_squared_error = np.array([[np.power(np.sum(diff), 2)]])
         # mean_squared_error = mean_squared_error / np.max(mean_squared_error)
         # mean_squared_error = np.array([[np.mean(np.array(np.power(np.sum(diff), 2)))]])
-        mean_squared_error = np.mean(0.5 * np.square(diff), axis=-1, keepdims=True)
+        mean_squared_error = np.sqrt(np.mean(0.5 * np.square(diff), axis=-1, keepdims=True))
         # Todo(kaj): pochodna funkcji " 2x"
         # self.__calculateCorrectionAndWeights(diff * 2)
         self.__calculateCorrectionAndWeights(diff / 2)

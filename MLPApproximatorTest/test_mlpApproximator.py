@@ -164,7 +164,7 @@ class TestMlpApproximator(TestCase):
             max_samples = 100
             input_number = output_number = 1
             hidden_layer_number = 80
-            epoch_number = 10000
+            epoch_number = 15000
 
             samples = max_samples
             x = np.arange(samples).reshape([samples, 1]) * 2 * np.pi / samples - np.pi
