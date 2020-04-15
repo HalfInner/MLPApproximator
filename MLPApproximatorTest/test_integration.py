@@ -49,9 +49,10 @@ class TestIntegration(TestCase):
         fitting_set_x, testing_set_x = np.array_split(training_set.X[:fitting_range].T, [fitting_range])
         fitting_set_y, testing_set_y = np.array_split(training_set.Y[:fitting_range].T, [fitting_range])
 
-        self.__train_and_plot(fitting_set_x, fitting_set_y, parameter_m, required_samples)
+        self.__train_and_plot(fitting_set_x, fitting_set_y, testing_set_x, testing_set_y, parameter_m, required_samples)
 
-    def __train_and_plot(self, fitting_set_x, fitting_set_y, parameter_m, required_samples):
+    def __train_and_plot(self, fitting_set_x, fitting_set_y, testing_set_x, testing_set_y, parameter_m,
+                         required_samples):
         directory = self.__create_date_folder_if_not_exists()
         for sub_test_idx, group_parameter in enumerate(
                 product(range(parameter_m, 10 * parameter_m, parameter_m), range(100, 1000, 100))):
@@ -86,8 +87,8 @@ class TestIntegration(TestCase):
                          label='F3 RMSE')
                 plt.plot(np.ascontiguousarray(np.arange(epoch_number)), metrics.AvgMeanSquaredError, 'm-',
                          label='Avg RMSE')
-                plt.xlabel(plot_name)
-                plt.ylim(0, np.max(metrics.MeanSquaredErrors[0]) * 1.1)
+                plt.xlabel('FIT ' + plot_name)
+                plt.ylim(0, np.max(metrics.MeanSquaredErrors) * 1.1)
                 plt.legend()
                 # plt.show()
                 plt.savefig('{}_FIT_MSE.png'.format(file_name))
@@ -99,24 +100,24 @@ class TestIntegration(TestCase):
                 plt.plot(fitting_set_x.T[1], learned_outputs.T[1], 'r-', label='F2 Predicted')
                 plt.plot(fitting_set_x.T[2], fitting_set_y.T[2], 'k-', label='F3 Expected')
                 plt.plot(fitting_set_x.T[2], learned_outputs.T[2], 'm-', label='F3 Predicted')
-                plt.xlabel(plot_name)
+                plt.xlabel('FIT ' + plot_name + ' {:2.3}%'.format(np.mean(metrics.AvgMeanSquaredError) * 100))
                 plt.ylim(-0.1, 1.1)
                 plt.legend()
                 # plt.show()
                 plt.savefig('{}_FIT_ACC.png'.format(file_name))
                 plt.cla()
 
-                test_output, loss = mlp_approximator.test(TestingSet([fitting_set_x, fitting_set_y]))
-                plt.plot(fitting_set_x.T[0], fitting_set_y.T[0], 'b-', label='F1 Expected')
-                plt.plot(fitting_set_x.T[0], test_output.T[0], 'y-',
-                         label='F1 Predicted {:.3}%'.format(loss[0][0] * 100))
-                plt.plot(fitting_set_x.T[1], fitting_set_y.T[1], 'g-', label='F2 Expected')
-                plt.plot(fitting_set_x.T[1], test_output.T[1], 'r-',
-                         label='F2 Predicted {:.3}%'.format(loss[1][0] * 100))
-                plt.plot(fitting_set_x.T[2], fitting_set_y.T[2], 'k-', label='F3 Expected')
-                plt.plot(fitting_set_x.T[2], test_output.T[2], 'm-',
-                         label='F3 Predicted {:.3}%'.format(loss[2][0] * 100))
-                plt.xlabel(plot_name + '{:.3}%'.format(np.mean(loss)))
+                test_output, loss = mlp_approximator.test(TestingSet([testing_set_x, testing_set_y]))
+                plt.plot(testing_set_x.T[0], testing_set_y.T[0], 'b-', label='F1 Expected')
+                plt.plot(testing_set_x.T[0], test_output.T[0], 'y-',
+                         label='F1 Predicted {:2.3}%'.format(loss[0][0] * 100))
+                plt.plot(testing_set_x.T[1], testing_set_y.T[1], 'g-', label='F2 Expected')
+                plt.plot(testing_set_x.T[1], test_output.T[1], 'r-',
+                         label='F2 Predicted {:2.3}%'.format(loss[1][0] * 100))
+                plt.plot(testing_set_x.T[2], testing_set_y.T[2], 'k-', label='F3 Expected')
+                plt.plot(testing_set_x.T[2], test_output.T[2], 'm-',
+                         label='F3 Predicted {:2.3}%'.format(loss[2][0] * 100))
+                plt.xlabel('TEST ' + plot_name + ' {:2.3}%'.format(np.mean(loss) * 100))
                 plt.ylim(-0.1, 1.1)
                 plt.legend()
                 # plt.show()
