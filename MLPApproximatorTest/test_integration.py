@@ -45,19 +45,21 @@ class TestIntegration(TestCase):
         required_samples = 130
         training_set = training_function_generator.generate(required_samples)
 
-        # normalizing
         fitting_range = 100
-        fitting_set_x = training_set.X[:fitting_range].T
-        fitting_set_y = training_set.Y[:fitting_range].T
+        fitting_set_x, testing_set_x = np.array_split(training_set.X[:fitting_range].T, [fitting_range])
+        fitting_set_y, testing_set_y = np.array_split(training_set.Y[:fitting_range].T, [fitting_range])
 
+        self.__train_and_plot(fitting_set_x, fitting_set_y, parameter_m, required_samples)
+
+    def __train_and_plot(self, fitting_set_x, fitting_set_y, parameter_m, required_samples):
         directory = self.__create_date_folder_if_not_exists()
         for sub_test_idx, group_parameter in enumerate(
-                product(range(parameter_m, 10 * parameter_m), range(100, 1000, 10))):
+                product(range(parameter_m, 10 * parameter_m, parameter_m), range(100, 1000, 100))):
             input_number = output_number = 3
             hidden_layer_number = group_parameter[0]
             epoch_number = group_parameter[1]
 
-            file_name ='{}M{:03}_N{:03}_I{:03}_S{:04}'.format(
+            file_name = '{}M{:03}_N{:03}_I{:03}_S{:04}'.format(
                 directory, parameter_m, hidden_layer_number, epoch_number, required_samples)
             log_file_name = file_name + '_LOG.txt'
             with open(log_file_name, 'w') as f, redirect_stdout(f):
@@ -103,7 +105,6 @@ class TestIntegration(TestCase):
                 # plt.show()
                 plt.savefig('{}_ACC.png'.format(file_name))
                 plt.cla()
-
             break
 
     def __create_date_folder_if_not_exists(self):
