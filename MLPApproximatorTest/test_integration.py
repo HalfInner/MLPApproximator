@@ -60,9 +60,9 @@ class TestIntegration(TestCase):
 
         # TODO(kaj): provide random function generator (not necessary?)
         training_functions = [
-            [-7, 21, 0, -8, 24],     # -7x4 + 21x3 – 8x + 24
-            [-2, 0, 0, 0, 0],        # -2x^4
-            [3, 0, -4, 0, 0],         # 3x^4 - 4x^2 + 4x^2
+            [-7, 21, 0, -8, 24],  # -7x4 + 21x3 – 8x + 24
+            [-2, 0, 0, 0, 0],  # -2x^4
+            [3, 0, -4, 0, 0],  # 3x^4 - 4x^2 + 4x^2
         ]
 
         self.assertEqual(parameter_m, len(training_functions[0]),
@@ -87,9 +87,9 @@ class TestIntegration(TestCase):
 
         # TODO(kaj): provide random function generator (not necessary?)
         training_functions = [
-            [-3, 0, -7, 21, 0, -8, 24],     # 3x6 – 7x4 + 21x3 – 8x + 24
-            [1, 0, 0, 0, 0, 0, 0],          # x^6
-            [-2, 1, 0, 0, 4, 0, 0],         # -2x^6 + x^5 + 4x^2
+            [-3, 0, -7, 21, 0, -8, 24],  # 3x6 – 7x4 + 21x3 – 8x + 24
+            [1, 0, 0, 0, 0, 0, 0],  # x^6
+            [-2, 1, 0, 0, 4, 0, 0],  # -2x^6 + x^5 + 4x^2
         ]
 
         self.assertEqual(parameter_m, len(training_functions[0]),
@@ -151,4 +151,3 @@ class TestIntegration(TestCase):
                 test_output, loss = mlp_approximator.test(TestingSet([testing_set_x, testing_set_y]))
                 self.__mlp_utils.plot_testing_approximation(
                     file_name, plot_name, testing_set_x, testing_set_y, test_output, loss, to_file)
-            break

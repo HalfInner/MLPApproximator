@@ -13,11 +13,12 @@ class MlpApproximator:
     """
     Multi Layer Perceptron
     Approximate function shape
+    Input must be in range [0,1]
     """
 
     def __init__(self, input_number, output_number, hidden_layer_number,
                  activation_function_hidden_layer, activation_function_output_layer,
-                 debug_level_1_on=False, debug_level_2_on=False,
+                 use_biases=True, debug_level_1_on=False, debug_level_2_on=False,
                  hidden_layer_weights=None, output_layer_weights=None):
         """
 
@@ -29,7 +30,7 @@ class MlpApproximator:
         self.__debug__level_1_on = debug_level_1_on
         self.__debug__level_2_on = debug_level_2_on
 
-        self.__bias_number = 1
+        self.__bias_number = 1 if use_biases else 0
         self.__input_number = input_number
         self.__output_number = output_number
 

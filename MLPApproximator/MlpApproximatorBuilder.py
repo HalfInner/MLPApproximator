@@ -19,6 +19,7 @@ class MlpApproximatorBuilder:
         self.__verbose_debug_mode = None
         self.__hidden_layer_weights = None
         self.__output_layer_weights = None
+        self.__use_biases = None
 
     def setInputNumber(self, input_number: int):
         self.__input_number = input_number
@@ -56,6 +57,10 @@ class MlpApproximatorBuilder:
         self.__output_layer_weights = weights
         return self
 
+    def setUseBiases(self, use_biases: bool):
+        self.__use_biases = use_biases
+        return self
+
     def build(self):
         if self.__input_number is None:
             raise RuntimeError('Input node number is required')
@@ -75,6 +80,8 @@ class MlpApproximatorBuilder:
             pass
         if self.__output_layer_weights is None:
             pass
+        if self.__use_biases is None:
+            self.__use_biases = True
 
         return MlpApproximator(
             input_number=self.__input_number,
@@ -85,4 +92,5 @@ class MlpApproximatorBuilder:
             debug_level_1_on=self.__debug_mode,
             debug_level_2_on=self.__verbose_debug_mode,
             hidden_layer_weights=self.__hidden_layer_weights,
-            output_layer_weights=self.__output_layer_weights)
+            output_layer_weights=self.__output_layer_weights,
+            use_biases=self.__use_biases)
