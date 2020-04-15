@@ -46,8 +46,8 @@ class TestIntegration(TestCase):
         training_set = training_function_generator.generate(required_samples)
 
         fitting_range = 100
-        fitting_set_x, testing_set_x = np.array_split(training_set.X[:fitting_range].T, [fitting_range])
-        fitting_set_y, testing_set_y = np.array_split(training_set.Y[:fitting_range].T, [fitting_range])
+        fitting_set_x, testing_set_x = np.array_split(training_set.X.T, [fitting_range])
+        fitting_set_y, testing_set_y = np.array_split(training_set.Y.T, [fitting_range])
 
         self.__train_and_plot(fitting_set_x, fitting_set_y, testing_set_x, testing_set_y, parameter_m, required_samples)
 
@@ -58,7 +58,8 @@ class TestIntegration(TestCase):
                 product(range(parameter_m, 10 * parameter_m, parameter_m), range(100, 1000, 100))):
             input_number = output_number = 3
             hidden_layer_number = group_parameter[0]
-            epoch_number = group_parameter[1]
+            # epoch_number = group_parameter[1]
+            epoch_number = 1000
 
             file_name = '{}M{:03}_N{:03}_I{:03}_S{:04}'.format(
                 directory, parameter_m, hidden_layer_number, epoch_number, required_samples)
