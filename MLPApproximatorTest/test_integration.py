@@ -53,7 +53,7 @@ class TestIntegration(TestCase):
             input_number = output_number = 3
             hidden_layer_number = group_parameter[0]
             # epoch_number = group_parameter[1]
-            epoch_number = 1
+            epoch_number = 10
 
             mlp_approximator = MlpApproximatorBuilder() \
                 .setInputNumber(input_number) \
@@ -68,30 +68,36 @@ class TestIntegration(TestCase):
                 TestingSet([fitting_set_x, fitting_set_y]),
                 epoch_number=epoch_number)
 
-            plot_name = '{}: Epochs={} Samples={} HiddenNeurons={}'.format(
-                sub_test_idx, epoch_number, required_samples, hidden_layer_number)
-            plt.plot(np.ascontiguousarray(np.arange(epoch_number)), metrics.MeanSquaredErrors[0], '-',
-                     label='Rooted Mean Squared Error')
+            plot_name = '{}: M={} Hidden={} Epochs={} Samples={} HiddenNeurons={}'.format(
+                sub_test_idx, parameter_m, hidden_layer_number, epoch_number, required_samples, hidden_layer_number)
+            plt.plot(np.ascontiguousarray(np.arange(epoch_number)), metrics.MeanSquaredErrors[0], 'b-',
+                     label='F1 RMSE')
+            plt.plot(np.ascontiguousarray(np.arange(epoch_number)), metrics.MeanSquaredErrors[1], 'r-',
+                     label='F2 RMSE')
+            plt.plot(np.ascontiguousarray(np.arange(epoch_number)), metrics.MeanSquaredErrors[2], 'g-',
+                     label='F3 RMSE')
+            plt.plot(np.ascontiguousarray(np.arange(epoch_number)), np.mean(metrics.MeanSquaredErrors, axis=0), 'b-',
+                     label='Avg RMSE')
             plt.xlabel(plot_name)
             plt.ylim(0, np.max(metrics.MeanSquaredErrors[0]) * 1.1)
             plt.legend()
-            plt.show()
-            # path = 'C:\\Users\\kajbr\\OneDrive\\Dokumenty\\StudyTmp\\'
-            # plt.savefig('{}{:03}MSE.png'.format(path, max_samples))
-            # plt.cla()
+            # plt.show()
+            path = 'C:\\Users\\kajbr\\OneDrive\\Dokumenty\\StudyTmp\\'
+            plt.savefig('{}{:03}MSE.png'.format(path, required_samples))
+            plt.cla()
 
-            plt.plot(fitting_set_x.T[0], fitting_set_y.T[0], 'b-', label='1 Expected')
-            plt.plot(fitting_set_x.T[0], learned_outputs.T[0], 'y-', label='1 Predicted')
-            plt.plot(fitting_set_x.T[1], fitting_set_y.T[1], 'g-', label='2 Expected')
-            plt.plot(fitting_set_x.T[1], learned_outputs.T[1], 'r-', label='2 Predicted')
-            plt.plot(fitting_set_x.T[2], fitting_set_y.T[2], 'k-', label='3 Expected')
-            plt.plot(fitting_set_x.T[2], learned_outputs.T[2], 'm-', label='3 Predicted')
+            plt.plot(fitting_set_x.T[0], fitting_set_y.T[0], 'b-', label='F1 Expected')
+            plt.plot(fitting_set_x.T[0], learned_outputs.T[0], 'y-', label='F1 Predicted')
+            plt.plot(fitting_set_x.T[1], fitting_set_y.T[1], 'g-', label='F2 Expected')
+            plt.plot(fitting_set_x.T[1], learned_outputs.T[1], 'r-', label='F2 Predicted')
+            plt.plot(fitting_set_x.T[2], fitting_set_y.T[2], 'k-', label='F3 Expected')
+            plt.plot(fitting_set_x.T[2], learned_outputs.T[2], 'm-', label='F3 Predicted')
             plt.xlabel(plot_name)
             plt.ylim(-0.1, 1.1)
             plt.legend()
-            plt.show()
-            # plt.savefig('{}{:03}ACC.png'.format(path, max_samples))
-            # plt.cla()
+            # plt.show()
+            plt.savefig('{}{:03}ACC.png'.format(path, required_samples))
+            plt.cla()
 
             break
 
