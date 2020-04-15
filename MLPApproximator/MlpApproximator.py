@@ -1,5 +1,7 @@
 #  Copyright (c) 2020
 #  Kajetan Brzuszczak
+from timeit import default_timer as timer
+
 import numpy as np
 
 from MLPApproximator.MlpFunctionGenerator import TestingSet
@@ -14,7 +16,8 @@ class MlpApproximator:
     """
 
     def __init__(self, input_number, output_number, hidden_layer_number,
-                 activation_function_hidden_layer, activation_function_output_layer, debug_on=False,
+                 activation_function_hidden_layer, activation_function_output_layer,
+                 debug_level_1_on=False, debug_level_2_on=False,
                  hidden_layer_weights=None, output_layer_weights=None):
         """
 
@@ -23,12 +26,14 @@ class MlpApproximator:
         :param hidden_layer_number:
         :param debug_file:
         """
-        self.__debug_on = debug_on
+        self.__debug__level_1_on = debug_level_1_on
+        self.__debug__level_2_on = debug_level_2_on
 
         self.__bias_number = 1
         self.__input_number = input_number
         self.__output_number = output_number
 
+        self.__debug('\tMLP Function Approximator')
         self.__debug(' input number={}'.format(input_number))
         self.__debug('output number={}'.format(output_number))
         self.__debug('hidden number={}'.format(hidden_layer_number))
@@ -37,14 +42,14 @@ class MlpApproximator:
             input_number + self.__bias_number,
             hidden_layer_number + self.__bias_number,
             activation_function=activation_function_hidden_layer,
-            debug_on=debug_on,
+            debug_on=debug_level_2_on,
             weight=hidden_layer_weights,
             name="P_hide")
         self.__p2 = Perceptron(
             hidden_layer_number + self.__bias_number,
             output_number,
             activation_function=activation_function_output_layer,
-            debug_on=debug_on,
+            debug_on=debug_level_2_on,
             weight=output_layer_weights,
             name="P_out")
         self.__mean_output_error = None
@@ -59,23 +64,29 @@ class MlpApproximator:
 
         inputs_with_bias = self.__create_input_with_biases(train_data_set)
 
+        self.__debug('Train on {} samples'.format(len(train_data_set.X)))
         metrics = MLPMetrics()
+        training_time_start = timer()
         for epoch in range(epoch_number):
-            self.__debug('################################################')
-            self.__debug('Current epoch: ', epoch)
-            self.__debug('################################################')
-            self.__debug('Forward Propagation')
+            epoch_time_start = timer()
+
+            self.__debug('Epoch:{:>5}/{:<5}'.format(epoch + 1, epoch_number))
             self.__output = self.propagateForward(inputs_with_bias)
-
-            mean_squared_error = self.__calculate_rmse(train_data_set.Output)
-
-            self.__debug('Backward Error Propagation')
+            loss = self.__calculate_rmse(train_data_set.Output)
             correction = self.propagateErrorBackward(train_data_set.Output)
 
-            metrics.addCorrection(correction)
-            metrics.addMeanSquaredError(mean_squared_error)
+            epoch_time_stop = timer()
 
-        self.__debug('Current denormalized output ', self.__p2.output())
+            metrics.addCorrection(correction)
+            metrics.addMeanSquaredError(loss)
+            self.__debug('\tEpoch Time={:2.3}s GlobalTime={:2.3}s Loss={:2.3}%\n'.format(
+                epoch_time_stop - epoch_time_start,
+                epoch_time_stop - training_time_start,
+                np.mean(loss * 100)))
+
+        self.__debug('\tTraining Time={:2.3}s\n'.format(timer() - training_time_start))
+        if self.__debug__level_2_on:
+            self.__debug('\tCurrent denormalized output=\n{}\n'.format(self.__p2.output()))
         # self.__output = self.__denormalize_output(self.__p2.output())
         self.__output = self.__p2.output()
         return self.__output, metrics
@@ -90,16 +101,21 @@ class MlpApproximator:
         return inputs_with_bias
 
     def test(self, test_data_set: TestingSet):
-        self.__debug('################################################')
         self.__debug('Testing: ')
         inputs_with_bias = self.__create_input_with_biases(test_data_set)
 
         self.__output = self.propagateForward(inputs_with_bias)
         loss = self.__calculate_rmse(test_data_set.Output)
+        self.__debug('\tLoss={:2.3}%'.format(np.mean(loss) * 100))
+        if self.__debug__level_2_on:
+            self.__debug('\tCurrent denormalized output=\n{}'.format(self.__p2.output()))
         return self.__output, loss
 
     def __calculate_rmse(self, expected_out):
-        return np.sqrt(np.mean(0.5 * np.square(expected_out - self.__p2.output()), axis=0, keepdims=True)).T
+        loss = np.sqrt(np.mean(0.5 * np.square(expected_out - self.__p2.output()), axis=0, keepdims=True)).T
+        if self.__debug__level_2_on:
+            self.__debug('Loss=\n{}'.format(loss))
+        return loss
 
     def propagateForward(self, input_data):
         """
@@ -122,24 +138,5 @@ class MlpApproximator:
         return correction
 
     def __debug(self, msg, *args):
-        if self.__debug_on:
+        if self.__debug__level_1_on:
             print('Approximator: ', msg, *args)
-
-    def __normalize_data_input(self, data_set: np.array):
-        extending_ratio = 1.1
-        self.__min_in = np.min(data_set - extending_ratio)
-        self.__max_in = np.max(data_set + extending_ratio)
-
-        self.__debug('IN  Min={}\tMax={}'.format(self.__min_in, self.__max_in))
-        return (data_set - self.__min_in) / (self.__max_in - self.__min_in)
-
-    def __normalize_data_output(self, data_set: np.array):
-        extending_ratio = 1.1
-        self.__min_out = np.min(data_set - extending_ratio)
-        self.__max_out = np.max(data_set + extending_ratio)
-
-        self.__debug('OUT Min={}\tMax={}'.format(self.__min_out, self.__max_out))
-        return (data_set - self.__min_out) / (self.__max_out - self.__min_out)
-
-    def __denormalize_output(self, data_set):
-        return data_set * (self.__max_out - self.__min_out) + self.__min_out

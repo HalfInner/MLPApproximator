@@ -75,6 +75,6 @@ class MlpApproximatorBuilder:
             hidden_layer_number=self.__hidden_layer_number,
             activation_function_hidden_layer=self.__activation_function_hidden_layer,
             activation_function_output_layer=self.__activation_function_output_layer,
-            debug_on=self.__debug_mode,
+            debug_level_1_on=self.__debug_mode,
             hidden_layer_weights=self.__hidden_layer_weights,
             output_layer_weights=self.__output_layer_weights)
