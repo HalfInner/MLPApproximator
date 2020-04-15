@@ -45,18 +45,8 @@ class TestIntegration(TestCase):
 
         # normalizing
         fitting_range = 100
-        test_range = 20
         fitting_set_x = training_set.X[:fitting_range].T
         fitting_set_y = training_set.Y[:fitting_range].T
-
-        # samples = max_samples
-        # x = np.arange(samples).reshape([samples, 1]) * 2 * np.pi / samples - np.pi
-        # inputs = np.ascontiguousarray(x, dtype=float)
-        # # f_x = lambda val: np.sin(val) + 2.
-        # f_x = lambda x_in: (1 / 20) * (x_in + 4) * (x_in + 2) * (x_in + 1) * (x_in - 1) * (x_in - 3) + 2
-        # outputs = f_x(inputs)
-
-        results = []
 
         for sub_test_idx, group_parameter in enumerate(
                 product(range(parameter_m, 10 * parameter_m), range(100, 1000, 10))):
@@ -90,14 +80,14 @@ class TestIntegration(TestCase):
             # plt.savefig('{}{:03}MSE.png'.format(path, max_samples))
             # plt.cla()
 
-            # plt.plot(fitting_set_x.T[0], fitting_set_y.T[0], 'b.', label='1 Expected')
-            # plt.plot(fitting_set_x.T[0], learned_outputs.T[0], 'r.', label='1 Predicted')
-            # plt.plot(fitting_set_x.T[1], fitting_set_y.T[1], 'b.', label='2 Expected')
-            # plt.plot(fitting_set_x.T[1], learned_outputs.T[1], 'r.', label='2 Predicted')
-            # plt.plot(fitting_set_x.T[2], fitting_set_y.T[2], 'b.', label='3 Expected')
-            # plt.plot(fitting_set_x.T[2], learned_outputs.T[2], 'r.', label='3 Predicted')
+            plt.plot(fitting_set_x.T[0], fitting_set_y.T[0], 'b-', label='1 Expected')
+            plt.plot(fitting_set_x.T[0], learned_outputs.T[0], 'y-', label='1 Predicted')
+            plt.plot(fitting_set_x.T[1], fitting_set_y.T[1], 'g-', label='2 Expected')
+            plt.plot(fitting_set_x.T[1], learned_outputs.T[1], 'r-', label='2 Predicted')
+            plt.plot(fitting_set_x.T[2], fitting_set_y.T[2], 'k-', label='3 Expected')
+            plt.plot(fitting_set_x.T[2], learned_outputs.T[2], 'm-', label='3 Predicted')
             plt.xlabel(plot_name)
-            plt.ylim(-10., 10)
+            plt.ylim(-0.1, 1.1)
             plt.legend()
             plt.show()
             # plt.savefig('{}{:03}ACC.png'.format(path, max_samples))
