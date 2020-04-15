@@ -16,6 +16,10 @@ class MLPMetrics:
     def MeanSquaredErrors(self):
         return self.__mean_squared_errors
 
+    @property
+    def AvgMeanSquaredError(self):
+        return np.mean(self.__mean_squared_errors, axis=0)
+
     def addCorrection(self, correction: np.array):
         if self.__corrections is None:
             self.__corrections = correction

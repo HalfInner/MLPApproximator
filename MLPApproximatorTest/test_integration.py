@@ -56,10 +56,11 @@ class TestIntegration(TestCase):
             input_number = output_number = 3
             hidden_layer_number = group_parameter[0]
             epoch_number = group_parameter[1]
-            # epoch_number = 10
-            file_name ='{}Out_M{:03}_N{:03}_I{:03}_S{:04}.txt'.format(
+
+            file_name ='{}M{:03}_N{:03}_I{:03}_S{:04}'.format(
                 directory, parameter_m, hidden_layer_number, epoch_number, required_samples)
-            with open(file_name, 'w') as f, redirect_stdout(f):
+            log_file_name = file_name + '_LOG.txt'
+            with open(log_file_name, 'w') as f, redirect_stdout(f):
                 mlp_approximator = MlpApproximatorBuilder() \
                     .setInputNumber(input_number) \
                     .setHiddenLayerNumber(hidden_layer_number) \
@@ -81,14 +82,13 @@ class TestIntegration(TestCase):
                          label='F2 RMSE')
                 plt.plot(np.ascontiguousarray(np.arange(epoch_number)), metrics.MeanSquaredErrors[2], 'g-',
                          label='F3 RMSE')
-                plt.plot(np.ascontiguousarray(np.arange(epoch_number)), np.mean(metrics.MeanSquaredErrors, axis=0),
-                         'm-',
+                plt.plot(np.ascontiguousarray(np.arange(epoch_number)), metrics.AvgMeanSquaredError, 'm-',
                          label='Avg RMSE')
                 plt.xlabel(plot_name)
                 plt.ylim(0, np.max(metrics.MeanSquaredErrors[0]) * 1.1)
                 plt.legend()
                 # plt.show()
-                plt.savefig('{}{:03}MSE.png'.format(directory, required_samples))
+                plt.savefig('{}_MSE.png'.format(file_name))
                 plt.cla()
 
                 plt.plot(fitting_set_x.T[0], fitting_set_y.T[0], 'b-', label='F1 Expected')
@@ -101,15 +101,14 @@ class TestIntegration(TestCase):
                 plt.ylim(-0.1, 1.1)
                 plt.legend()
                 # plt.show()
-                plt.savefig('{}{:03}ACC.png'.format(directory, required_samples))
+                plt.savefig('{}_ACC.png'.format(file_name))
                 plt.cla()
 
             break
 
     def __create_date_folder_if_not_exists(self):
         today = datetime.now()
-        h = "00" if today.hour < 12 else "12"
-        folder_name = str(today.strftime('%Y%m%d') + h)
+        folder_name = today.strftime('%Y%m%H%M')
         directory = '..\\TestResults\\' + folder_name + '\\'
         if not os.path.exists(directory):
             os.makedirs(directory)
