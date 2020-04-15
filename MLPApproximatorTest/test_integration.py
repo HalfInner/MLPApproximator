@@ -148,4 +148,3 @@ class TestIntegration(TestCase):
 
                 self.__mlp_utils.plot_testing_approximation(
                     file_name, mlp_approximator, plot_name, testing_set_x, testing_set_y, to_file)
-
