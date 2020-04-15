@@ -40,6 +40,7 @@ class MlpApproximatorAssembler:
         parser.add_argument('-b', '--use_biases', dest='Biases', action='store_const',
                             const=True,
                             help='Activate normalization over data set into range [0,1]. Default True.')
+
         parser.add_argument('-hf', '--hidden_layer_activation_function',
                             choices=['tanh', 'sigmoid', 'relu', 'linear'],
                             dest='HiddenLayerFunction',
@@ -62,24 +63,31 @@ class MlpApproximatorAssembler:
         parser.add_argument('-arg_f1', '--arguments_function_1', dest='f_1', action='append_const',
                             const=sum, default=False,
                             help='Generate function. Polynomials Representation. Each number represent one of factors. '
-                                 'Counting from right to left. To avoid factor, use 0')
+                                 'Counting from right to left. To avoid factor, use 0. Generate one output')
         parser.add_argument('-arg_f2', '--arguments_function_2', dest='f_2', action='append_const',
                             const=sum, default=False,
                             help='Generate function. Polynomials Representation. Each number represent one of factor. '
-                                 'Counting from right to left. To avoid factor, use 0')
+                                 'Counting from right to left. To avoid factor, use 0. Generate one output')
         parser.add_argument('-arg_f3', '--arguments_function_3', dest='f_3', action='append_const',
                             const=sum, default=False,
                             help='Generate function. Polynomials Representation. Each number represent one of factor. '
-                                 'Counting from right to left. To avoid factor, use 0')
+                                 'Counting from right to left. To avoid factor, use 0. Generate one output')
 
         parser.add_argument('-l1', '--log_level_1', dest='LogLevel1On', action='store_const',
-                            const=sum, default=False,
+                            const=sum, default=True,
                             help='Activate Simple Logging During Test. Default True')
 
-        parser.add_argument('-l2', '--log_level_2', dest='LogLevel2On', action='store_const',
+        parser.add_argument('-l2', '--log_level_2', dest='LogLevel1On', action='store_const',
                             const=sum, default=False,
-                            help='Activate Extended Logging During Test. This option includes matricies, results of '
-                                 'forward propagation alongside with backward propagation. Default False')
+                            help='Activate Verbose Logging During Test. Default False')
+
+        parser.add_argument('-plot', dest='PlotOn', action='store_const',
+                            const=sum, default=True,
+                            help='Generates learning charts after work. Default True')
+
+        parser.add_argument('-print', dest='PrintOn', action='store_const',
+                            const=sum, default=False,
+                            help='Write to stdout results as raw data. Default False')
 
         parser.add_argument('--version', action='version', version='%(prog)s 0.1a')
 
