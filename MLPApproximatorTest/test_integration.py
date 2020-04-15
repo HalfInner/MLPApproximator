@@ -140,11 +140,15 @@ class TestIntegration(TestCase):
                     epoch_number=epoch_number)
 
                 to_file = True
-                plot_name = self.__mlp_utils.plot_rmse(
-                    epoch_number, file_name, hidden_layer_number, metrics, parameter_m, sub_test_idx, to_file)
+
+                plot_name = '{:>3}: M={} Hidden={} Epochs={}'.format(
+                    sub_test_idx, parameter_m, hidden_layer_number, epoch_number)
+                self.__mlp_utils.plot_rmse(epoch_number, file_name, metrics, plot_name, to_file)
 
                 self.__mlp_utils.plot_learning_approximation(
                     file_name, fitting_set_x, fitting_set_y, learned_outputs, metrics, plot_name, to_file)
 
+                test_output, loss = mlp_approximator.test(TestingSet([testing_set_x, testing_set_y]))
                 self.__mlp_utils.plot_testing_approximation(
-                    file_name, mlp_approximator, plot_name, testing_set_x, testing_set_y, to_file)
+                    file_name, plot_name, testing_set_x, testing_set_y, test_output, loss, to_file)
+            break

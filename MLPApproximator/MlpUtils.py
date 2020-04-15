@@ -4,8 +4,6 @@ from datetime import datetime
 import numpy as np
 from matplotlib import pyplot as plt
 
-from MLPApproximator.MlpFunctionGenerator import TestingSet
-
 
 class MlpUtils:
     """MLP Utils"""
@@ -32,10 +30,11 @@ class MlpUtils:
                 testing_set_y = np.append(testing_set_y, np.array([training_set.Y.T[idx]]), axis=0)
         return fitting_set_x, fitting_set_y, testing_set_x, testing_set_y
 
-    def plot_testing_approximation(self, file_name, mlp_approximator, plot_name, testing_set_x, testing_set_y,
-                                   to_file):
+    def plot_testing_approximation(self, file_name, plot_name, testing_set_x, testing_set_y,
+                                   test_output, loss, to_file):
         """
 
+        :param test_output:
         :param file_name:
         :param mlp_approximator:
         :param plot_name:
@@ -43,7 +42,6 @@ class MlpUtils:
         :param testing_set_y:
         :param to_file:
         """
-        test_output, loss = mlp_approximator.test(TestingSet([testing_set_x, testing_set_y]))
         plt.plot(testing_set_x.T[0], testing_set_y.T[0], 'b-', label='F1 Expected')
         plt.plot(testing_set_x.T[0], test_output.T[0], 'y-',
                  label='F1 Predicted {:2.3}%'.format(loss[0][0] * 100))
@@ -89,7 +87,7 @@ class MlpUtils:
         else:
             plt.show()
 
-    def plot_rmse(self, epoch_number, file_name, hidden_layer_number, metrics, parameter_m, sub_test_idx, to_file):
+    def plot_rmse(self,  epoch_number, file_name, metrics, plot_name, to_file):
         """
 
         :param epoch_number:
@@ -101,8 +99,6 @@ class MlpUtils:
         :param to_file:
         :return:
         """
-        plot_name = '{:>3}: M={} Hidden={} Epochs={}'.format(
-            sub_test_idx, parameter_m, hidden_layer_number, epoch_number)
         plt.plot(np.ascontiguousarray(np.arange(epoch_number)), metrics.MeanSquaredErrors[0], 'b-',
                  label='F1 RMSE')
         plt.plot(np.ascontiguousarray(np.arange(epoch_number)), metrics.MeanSquaredErrors[1], 'r-',
