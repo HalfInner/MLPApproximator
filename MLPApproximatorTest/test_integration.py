@@ -7,8 +7,9 @@ from unittest import TestCase
 import numpy as np
 from matplotlib import pyplot as plt
 
+from MLPApproximator.MlpActivationFunction import TanhActivationFunction, SigmoidActivationFunction
 from MLPApproximator.MlpApproximatorBuilder import MlpApproximatorBuilder
-from MLPApproximator.MlpFunctionGenerator import FunctionGenerator
+from MLPApproximator.MlpFunctionGenerator import FunctionGenerator, TestingSet
 
 
 class TestIntegration(TestCase):
@@ -26,72 +27,83 @@ class TestIntegration(TestCase):
     def test_conductTestM3(self):
         parameter_m = 3
 
-        output_number = 3
-        # TODO(kaj): provide random function generator
+        # TODO(kaj): provide random function generator (not necessary?)
         training_functions = [
-            [0, 1, 1],
-            [0, 1, 1],
-            [0, 1, 1]
+            [1, 1, 0],
+            [1, -1, 0],
+            [-2, 2, 0]
         ]
 
-        # TODO(kaj): provide random function generator, at least in test functions
-        test_functions = [
-            [3, 2, 1],
-            [-3, 0, 1],
-            [3, -2, -1]
-        ]
         self.assertEqual(parameter_m, len(training_functions[0]), "This tests requires M-parameter functions")
 
         training_function_generator = FunctionGenerator()
-
         for function in training_functions:
             training_function_generator.addFunction(function)
 
-        test_function_generator = FunctionGenerator()
-
-        for function in training_functions:
-            test_function_generator.addFunction(function)
-
-        required_samples = 100
+        required_samples = 130
         training_set = training_function_generator.generate(required_samples)
-        print(training_set.Output[0])
-        test_set = test_function_generator.generate(required_samples)
+
+        # normalizing
+        fitting_range = 100
+        test_range = 20
+        fitting_set_x = training_set.X[:fitting_range]
+        fitting_set_y = training_set.Y[:fitting_range]
+
+        # samples = max_samples
+        # x = np.arange(samples).reshape([samples, 1]) * 2 * np.pi / samples - np.pi
+        # inputs = np.ascontiguousarray(x, dtype=float)
+        # # f_x = lambda val: np.sin(val) + 2.
+        # f_x = lambda x_in: (1 / 20) * (x_in + 4) * (x_in + 2) * (x_in + 1) * (x_in - 1) * (x_in - 3) + 2
+        # outputs = f_x(inputs)
 
         results = []
 
-        for sub_test_idx, group_parameter in enumerate(product(range(parameter_m, 10 * parameter_m), range(100, 1000))):
-            parameter_n = group_parameter[0]
-            parameter_i = group_parameter[1]
-            print('I: ', parameter_i)
-            parameter_n = 5
-            print('N: ', parameter_n)
+        for sub_test_idx, group_parameter in enumerate(
+                product(range(parameter_m, 10 * parameter_m), range(100, 1000, 10))):
+            input_number = output_number = 3
+            hidden_layer_number = group_parameter[0]
+            # epoch_number = group_parameter[1]
+            epoch_number = 1
 
             mlp_approximator = MlpApproximatorBuilder() \
-                .setInputNumber(parameter_m) \
-                .setHiddenLayerNumber(parameter_n) \
+                .setInputNumber(input_number) \
+                .setHiddenLayerNumber(hidden_layer_number) \
                 .setOutputNumber(output_number) \
-                .setDebugMode(False) \
+                .setActivationFunctionForHiddenLayer(TanhActivationFunction()) \
+                .setActivationFunctionForOutputLayer(SigmoidActivationFunction()) \
+                .setDebugMode(True) \
                 .build()
 
-            learn_output, metrics = mlp_approximator.train(training_set, parameter_i)
+            learned_outputs, metrics = mlp_approximator.train(
+                TestingSet([fitting_set_x, fitting_set_y]),
+                epoch_number=epoch_number)
 
-            plt.plot(metrics.MeanSquaredErrors[0], label='Mean Squared Error Out1')
-            plt.plot(metrics.MeanSquaredErrors[1], label='Mean Squared Error Out2')
-            plt.plot(np.mean(metrics.MeanSquaredErrors, axis=0), label='Mean Squared Error AVG')
-            plt.xlabel('Epochs (Hidden Neurons={})'.format(parameter_n))
+            plot_name = '{}: Epochs={} Samples={} HiddenNeurons={}'.format(
+                sub_test_idx, epoch_number, required_samples, hidden_layer_number)
+            plt.plot(np.ascontiguousarray(np.arange(epoch_number)), metrics.MeanSquaredErrors[0], '-',
+                     label='Rooted Mean Squared Error')
+            plt.xlabel(plot_name)
+            plt.ylim(0, np.max(metrics.MeanSquaredErrors[0]) * 1.1)
             plt.legend()
             plt.show()
+            # path = 'C:\\Users\\kajbr\\OneDrive\\Dokumenty\\StudyTmp\\'
+            # plt.savefig('{}{:03}MSE.png'.format(path, max_samples))
+            # plt.cla()
 
-            print(learn_output)
-            plt.plot(training_set.Input[0], learn_output[0], label='F1')
-            plt.plot(training_set.Input[1], learn_output[1], label='F2')
-            plt.plot(training_set.Input[2], learn_output[2], label='F3')
-            plt.xlabel('Epochs (Hidden Neurons={})'.format(parameter_n))
+            # plt.plot(fitting_set_x.T[0], fitting_set_y.T[0], 'b.', label='1 Expected')
+            # plt.plot(fitting_set_x.T[0], learned_outputs.T[0], 'r.', label='1 Predicted')
+            # plt.plot(fitting_set_x.T[1], fitting_set_y.T[1], 'b.', label='2 Expected')
+            # plt.plot(fitting_set_x.T[1], learned_outputs.T[1], 'r.', label='2 Predicted')
+            # plt.plot(fitting_set_x.T[2], fitting_set_y.T[2], 'b.', label='3 Expected')
+            # plt.plot(fitting_set_x.T[2], learned_outputs.T[2], 'r.', label='3 Predicted')
+            plt.xlabel(plot_name)
+            plt.ylim(-10., 10)
             plt.legend()
             plt.show()
+            # plt.savefig('{}{:03}ACC.png'.format(path, max_samples))
+            # plt.cla()
 
             break
-
 
     def test_runFromDeadline(self):
         delta = date(2020, 0o4, 0o3) - date.today()

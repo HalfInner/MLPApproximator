@@ -54,10 +54,10 @@ class MlpApproximator:
         if epoch_number <= 0:
             raise RuntimeError('Epoch must be at least one')
 
-        # normalized_train_data_input = self.__normalize_data_input(train_data_set.Input)
+        if np.any(np.abs(np.array(np.array([train_data_set.X, train_data_set.Y])) > 1.)):
+            raise RuntimeError('Expected dataset must be in range [-1; 1]')
+
         # TODO(kaj): Preceptron's responsibility
-        # normalized_train_data_input = np.append(
-        #     normalized_train_data_input, -np.ones(shape=(normalized_train_data_input.shape[0], 1)), axis=1)
         if self.__bias_number > 0:
             inputs_with_bias = np.append(
                 train_data_set.Input,

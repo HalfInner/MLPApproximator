@@ -164,12 +164,11 @@ class TestMlpApproximator(TestCase):
             max_samples = 100
             input_number = output_number = 1
             hidden_layer_number = 80
-            epoch_number = 1000
+            epoch_number = 10
 
             samples = max_samples
             x = np.arange(samples).reshape([samples, 1]) * 2 * np.pi / samples - np.pi
             inputs = np.ascontiguousarray(x, dtype=float)
-            # f_x = lambda val: np.sin(val) + 2.
             f_x = lambda x_in: (1 / 20) * (x_in + 4) * (x_in + 2) * (x_in + 1) * (x_in - 1) * (x_in - 3) + 2
             outputs = f_x(inputs)
             outputs = (outputs - np.min(outputs)) / np.ptp(outputs)
