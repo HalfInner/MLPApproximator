@@ -57,12 +57,7 @@ class MlpApproximator:
         if np.any(np.abs(np.array(np.array([train_data_set.X, train_data_set.Y])) > 1.)):
             raise RuntimeError('Expected dataset must be in range [-1; 1]')
 
-        # TODO(kaj): Preceptron's responsibility
-        if self.__bias_number > 0:
-            inputs_with_bias = np.append(
-                train_data_set.Input,
-                np.ones(shape=(train_data_set.Input.shape[0], self.__bias_number)),
-                axis=1)
+        inputs_with_bias = self.__create_input_with_biases(train_data_set)
 
         metrics = MLPMetrics()
         for epoch in range(epoch_number):
@@ -72,8 +67,10 @@ class MlpApproximator:
             self.__debug('Forward Propagation')
             self.__output = self.propagateForward(inputs_with_bias)
 
+            mean_squared_error = self.__calculate_rmse(train_data_set.Output)
+
             self.__debug('Backward Error Propagation')
-            correction, mean_squared_error = self.propagateErrorBackward(train_data_set.Output)
+            correction = self.propagateErrorBackward(train_data_set.Output)
 
             metrics.addCorrection(correction)
             metrics.addMeanSquaredError(mean_squared_error)
@@ -83,11 +80,26 @@ class MlpApproximator:
         self.__output = self.__p2.output()
         return self.__output, metrics
 
-    def test(self, test_data_set):  # TODO (kaj): Begin with training the neural network
-        pass
+    def __create_input_with_biases(self, train_data_set):
+        inputs_with_bias = train_data_set.Input
+        if self.__bias_number > 0:
+            inputs_with_bias = np.append(
+                train_data_set.Input,
+                np.ones(shape=(train_data_set.Input.shape[0], self.__bias_number)),
+                axis=1)
+        return inputs_with_bias
 
-    def output(self):
-        return self.__output
+    def test(self, test_data_set: TestingSet):
+        self.__debug('################################################')
+        self.__debug('Testing: ')
+        inputs_with_bias = self.__create_input_with_biases(test_data_set)
+
+        self.__output = self.propagateForward(inputs_with_bias)
+        loss = self.__calculate_rmse(test_data_set.Output)
+        return self.__output, loss
+
+    def __calculate_rmse(self, expected_out):
+        return np.sqrt(np.mean(0.5 * np.square(expected_out - self.__p2.output()), axis=0, keepdims=True)).T
 
     def propagateForward(self, input_data):
         """
@@ -95,18 +107,19 @@ class MlpApproximator:
 
         :param input_data:
         """
-        return self.__p2.forwardPropagation(self.__p1.forwardPropagation(input_data))
+        p1_out = self.__p1.forwardPropagation(input_data)
+        return self.__p2.forwardPropagation(p1_out)
 
-    def propagateErrorBackward(self, expected_output_data):
+    def propagateErrorBackward(self, expected_output_data: np.array):
         """
         Might be converted to private
 
         :param expected_output_data:
         """
-        correction, weight, mean_squared_error = self.__p2.propagateBackward(expected_output_data)
+        correction, weight = self.__p2.propagateBackward(expected_output_data)
         self.__p1.propagateHiddenBackward(correction, weight)
 
-        return correction, mean_squared_error
+        return correction
 
     def __debug(self, msg, *args):
         if self.__debug_on:

@@ -76,7 +76,7 @@ class TestIntegration(TestCase):
                     TestingSet([fitting_set_x, fitting_set_y]),
                     epoch_number=epoch_number)
 
-                plot_name = '{}: M={} Hidden={} Epochs={} Samples={}'.format(
+                plot_name = '{:>3}: M={} Hidden={} Epochs={} Samples={}'.format(
                     sub_test_idx, parameter_m, hidden_layer_number, epoch_number, required_samples)
                 plt.plot(np.ascontiguousarray(np.arange(epoch_number)), metrics.MeanSquaredErrors[0], 'b-',
                          label='F1 RMSE')
@@ -90,7 +90,7 @@ class TestIntegration(TestCase):
                 plt.ylim(0, np.max(metrics.MeanSquaredErrors[0]) * 1.1)
                 plt.legend()
                 # plt.show()
-                plt.savefig('{}_MSE.png'.format(file_name))
+                plt.savefig('{}_FIT_MSE.png'.format(file_name))
                 plt.cla()
 
                 plt.plot(fitting_set_x.T[0], fitting_set_y.T[0], 'b-', label='F1 Expected')
@@ -103,7 +103,24 @@ class TestIntegration(TestCase):
                 plt.ylim(-0.1, 1.1)
                 plt.legend()
                 # plt.show()
-                plt.savefig('{}_ACC.png'.format(file_name))
+                plt.savefig('{}_FIT_ACC.png'.format(file_name))
+                plt.cla()
+
+                test_output, loss = mlp_approximator.test(TestingSet([fitting_set_x, fitting_set_y]))
+                plt.plot(fitting_set_x.T[0], fitting_set_y.T[0], 'b-', label='F1 Expected')
+                plt.plot(fitting_set_x.T[0], test_output.T[0], 'y-',
+                         label='F1 Predicted {:.3}%'.format(loss[0][0] * 100))
+                plt.plot(fitting_set_x.T[1], fitting_set_y.T[1], 'g-', label='F2 Expected')
+                plt.plot(fitting_set_x.T[1], test_output.T[1], 'r-',
+                         label='F2 Predicted {:.3}%'.format(loss[1][0] * 100))
+                plt.plot(fitting_set_x.T[2], fitting_set_y.T[2], 'k-', label='F3 Expected')
+                plt.plot(fitting_set_x.T[2], test_output.T[2], 'm-',
+                         label='F3 Predicted {:.3}%'.format(loss[2][0] * 100))
+                plt.xlabel(plot_name + '{:.3}%'.format(np.mean(loss)))
+                plt.ylim(-0.1, 1.1)
+                plt.legend()
+                # plt.show()
+                plt.savefig('{}_TEST_ACC.png'.format(file_name))
                 plt.cla()
             break
 

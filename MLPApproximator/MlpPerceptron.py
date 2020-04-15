@@ -70,13 +70,13 @@ class Perceptron:
         self.__debug('ExpectedOut=\n{}'.format(expected_out))
         self.__debug('Out=\n{}'.format(self.__output_data))
         diff = expected_out - self.__output_data
-        mean_squared_error = np.sqrt(np.mean(0.5 * np.square(diff), axis=0, keepdims=True)).T
+        # mean_squared_error = np.sqrt(np.mean(0.5 * np.square(diff), axis=0, keepdims=True)).T
 
         # self.__calculateCorrectionAndWeights(diff * 2)
         empiric_scalar = 0.5
         self.__calculateCorrectionAndWeights(empiric_scalar * diff)
 
-        return self.__correction, self.__weights, mean_squared_error
+        return self.__correction, self.__weights
 
     def propagateHiddenBackward(self, next_correction, next_weight):
         """
