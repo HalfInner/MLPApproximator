@@ -27,6 +27,7 @@ class TestIntegration(TestCase):
     """
 
     def test_conductTestM3(self):
+        input_number = 3
         parameter_m = 3
 
         # TODO(kaj): provide random function generator (not necessary?)
@@ -49,10 +50,10 @@ class TestIntegration(TestCase):
         # fitting_set_x, testing_set_x = np.array_split(training_set.X.T, [fitting_range])
         # fitting_set_y, testing_set_y = np.array_split(training_set.Y.T, [fitting_range])
 
-        fitting_set_x = np.empty((0, 3))
-        fitting_set_y = np.empty((0, 3))
-        testing_set_x = np.empty((0, 3))
-        testing_set_y = np.empty((0, 3))
+        fitting_set_x = np.empty((0, input_number))
+        fitting_set_y = np.empty((0, input_number))
+        testing_set_x = np.empty((0, input_number))
+        testing_set_y = np.empty((0, input_number))
         ratio = 5
         for idx in range(required_samples):
             if idx % ratio:
@@ -72,7 +73,7 @@ class TestIntegration(TestCase):
             input_number = output_number = 3
             hidden_layer_number = group_parameter[0]
             # epoch_number = group_parameter[1]
-            epoch_number = 2
+            epoch_number = 100
 
             required_samples = fitting_set_x.shape[0] + testing_set_x.shape[0]
             file_name = '{}M{:03}_N{:03}_I{:03}_S{:04}'.format(
