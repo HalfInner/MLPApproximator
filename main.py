@@ -6,4 +6,4 @@ import sys
 from MLPApproximator.MlpAssembly import MlpApproximatorAssembler
 
 if __name__ == "__main__":
-    sys.exit(MlpApproximatorAssembler().run())
+    sys.exit(MlpApproximatorAssembler().run(sys.argv))

@@ -16,6 +16,7 @@ class MlpApproximatorBuilder:
         self.__activation_function_hidden_layer = None
         self.__activation_function_output_layer = None
         self.__debug_mode = None
+        self.__verbose_debug_mode = None
         self.__hidden_layer_weights = None
         self.__output_layer_weights = None
 
@@ -43,6 +44,10 @@ class MlpApproximatorBuilder:
         self.__debug_mode = debug_mode
         return self
 
+    def setVerboseDebugMode(self, debug_mode: bool):
+        self.__verbose_debug_mode = debug_mode
+        return self
+
     def setHiddenLayerWeights(self, weights: np.array):
         self.__hidden_layer_weights = weights
         return self
@@ -64,6 +69,8 @@ class MlpApproximatorBuilder:
             self.__activation_function_output_layer = SigmoidActivationFunction()
         if self.__debug_mode is None:
             self.__debug_mode = False
+        if self.__verbose_debug_mode is None:
+            self.__verbose_debug_mode = False
         if self.__hidden_layer_weights is None:
             pass
         if self.__output_layer_weights is None:
@@ -76,5 +83,6 @@ class MlpApproximatorBuilder:
             activation_function_hidden_layer=self.__activation_function_hidden_layer,
             activation_function_output_layer=self.__activation_function_output_layer,
             debug_level_1_on=self.__debug_mode,
+            debug_level_2_on=self.__verbose_debug_mode,
             hidden_layer_weights=self.__hidden_layer_weights,
             output_layer_weights=self.__output_layer_weights)

@@ -46,15 +46,17 @@ class TestIntegration(TestCase):
         required_samples = 130
         training_set = training_function_generator.generate(required_samples)
 
-        fitting_range = 100
-        # fitting_set_x, testing_set_x = np.array_split(training_set.X.T, [fitting_range])
-        # fitting_set_y, testing_set_y = np.array_split(training_set.Y.T, [fitting_range])
+        ratio = 5
+        fitting_set_x, fitting_set_y, testing_set_x, testing_set_y = self.__split_data_set(
+            input_number, ratio, required_samples, training_set)
 
+        self.__train_and_plot(fitting_set_x, fitting_set_y, testing_set_x, testing_set_y, parameter_m)
+
+    def __split_data_set(self, input_number, ratio, required_samples, training_set):
         fitting_set_x = np.empty((0, input_number))
         fitting_set_y = np.empty((0, input_number))
         testing_set_x = np.empty((0, input_number))
         testing_set_y = np.empty((0, input_number))
-        ratio = 5
         for idx in range(required_samples):
             if idx % ratio:
                 fitting_set_x = np.append(fitting_set_x, np.array([training_set.X.T[idx]]), axis=0)
@@ -62,18 +64,17 @@ class TestIntegration(TestCase):
             else:
                 testing_set_x = np.append(testing_set_x, np.array([training_set.X.T[idx]]), axis=0)
                 testing_set_y = np.append(testing_set_y, np.array([training_set.Y.T[idx]]), axis=0)
-
-        self.__train_and_plot(fitting_set_x, fitting_set_y, testing_set_x, testing_set_y, parameter_m)
+        return fitting_set_x, fitting_set_y, testing_set_x, testing_set_y
 
     def __train_and_plot(self, fitting_set_x, fitting_set_y, testing_set_x, testing_set_y, parameter_m):
 
         directory = self.__create_date_folder_if_not_exists()
         for sub_test_idx, group_parameter in enumerate(
-                product(range(parameter_m, 10 * parameter_m, parameter_m), range(100, 1000, 100))):
+                product(range(parameter_m, 10 * parameter_m + 1, parameter_m), range(100, 1000 + 1, 100))):
             input_number = output_number = 3
             hidden_layer_number = group_parameter[0]
-            # epoch_number = group_parameter[1]
-            epoch_number = 100
+            epoch_number = group_parameter[1]
+            # epoch_number = 100
 
             required_samples = fitting_set_x.shape[0] + testing_set_x.shape[0]
             file_name = '{}M{:03}_N{:03}_I{:03}_S{:04}'.format(
@@ -139,7 +140,6 @@ class TestIntegration(TestCase):
                 # plt.show()
                 plt.savefig('{}_TEST_ACC.png'.format(file_name))
                 plt.cla()
-            break
 
     def __create_date_folder_if_not_exists(self):
         today = datetime.now()
