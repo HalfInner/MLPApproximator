@@ -46,21 +46,35 @@ class TestIntegration(TestCase):
         training_set = training_function_generator.generate(required_samples)
 
         fitting_range = 100
-        fitting_set_x, testing_set_x = np.array_split(training_set.X.T, [fitting_range])
-        fitting_set_y, testing_set_y = np.array_split(training_set.Y.T, [fitting_range])
+        # fitting_set_x, testing_set_x = np.array_split(training_set.X.T, [fitting_range])
+        # fitting_set_y, testing_set_y = np.array_split(training_set.Y.T, [fitting_range])
 
-        self.__train_and_plot(fitting_set_x, fitting_set_y, testing_set_x, testing_set_y, parameter_m, required_samples)
+        fitting_set_x = np.empty((0, 3))
+        fitting_set_y = np.empty((0, 3))
+        testing_set_x = np.empty((0, 3))
+        testing_set_y = np.empty((0, 3))
+        ratio = 5
+        for idx in range(required_samples):
+            if idx % ratio:
+                fitting_set_x = np.append(fitting_set_x, np.array([training_set.X.T[idx]]), axis=0)
+                fitting_set_y = np.append(fitting_set_y, np.array([training_set.Y.T[idx]]), axis=0)
+            else:
+                testing_set_x = np.append(testing_set_x, np.array([training_set.X.T[idx]]), axis=0)
+                testing_set_y = np.append(testing_set_y, np.array([training_set.Y.T[idx]]), axis=0)
 
-    def __train_and_plot(self, fitting_set_x, fitting_set_y, testing_set_x, testing_set_y, parameter_m,
-                         required_samples):
+        self.__train_and_plot(fitting_set_x, fitting_set_y, testing_set_x, testing_set_y, parameter_m)
+
+    def __train_and_plot(self, fitting_set_x, fitting_set_y, testing_set_x, testing_set_y, parameter_m):
+
         directory = self.__create_date_folder_if_not_exists()
         for sub_test_idx, group_parameter in enumerate(
                 product(range(parameter_m, 10 * parameter_m, parameter_m), range(100, 1000, 100))):
             input_number = output_number = 3
             hidden_layer_number = group_parameter[0]
             # epoch_number = group_parameter[1]
-            epoch_number = 1000
+            epoch_number = 2
 
+            required_samples = fitting_set_x.shape[0] + testing_set_x.shape[0]
             file_name = '{}M{:03}_N{:03}_I{:03}_S{:04}'.format(
                 directory, parameter_m, hidden_layer_number, epoch_number, required_samples)
             log_file_name = file_name + '_LOG.txt'
@@ -78,8 +92,8 @@ class TestIntegration(TestCase):
                     TestingSet([fitting_set_x, fitting_set_y]),
                     epoch_number=epoch_number)
 
-                plot_name = '{:>3}: M={} Hidden={} Epochs={} Samples={}'.format(
-                    sub_test_idx, parameter_m, hidden_layer_number, epoch_number, required_samples)
+                plot_name = '{:>3}: M={} Hidden={} Epochs={}'.format(
+                    sub_test_idx, parameter_m, hidden_layer_number, epoch_number)
                 plt.plot(np.ascontiguousarray(np.arange(epoch_number)), metrics.MeanSquaredErrors[0], 'b-',
                          label='F1 RMSE')
                 plt.plot(np.ascontiguousarray(np.arange(epoch_number)), metrics.MeanSquaredErrors[1], 'r-',
