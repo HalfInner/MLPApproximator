@@ -38,7 +38,62 @@ class TestIntegration(TestCase):
             [-2, 2, 0]
         ]
 
-        self.assertEqual(parameter_m, len(training_functions[0]), "This tests requires M-parameter functions")
+        self.assertEqual(parameter_m, len(training_functions[0]),
+                         'This tests requires {}-parameter functions'.format(parameter_m))
+
+        training_function_generator = FunctionGenerator()
+        for function in training_functions:
+            training_function_generator.addFunction(function)
+
+        required_samples = 130
+        training_set = training_function_generator.generate(required_samples)
+
+        ratio = 5
+        fitting_set_x, fitting_set_y, testing_set_x, testing_set_y = self.__mlp_utils.split_data_set(
+            input_number, ratio, required_samples, training_set)
+
+        self.__train_and_plot(fitting_set_x, fitting_set_y, testing_set_x, testing_set_y, parameter_m)
+
+    def test_conductTestM5(self):
+        input_number = 3
+        parameter_m = 5
+
+        # TODO(kaj): provide random function generator (not necessary?)
+        training_functions = [
+            [-7, 21, 0, -8, 24],     # -7x4 + 21x3 – 8x + 24
+            [-2, 0, 0, 0, 0],        # -2x^4
+            [3, 0, -4, 0, 0],         # 3x^4 - 4x^2 + 4x^2
+        ]
+
+        self.assertEqual(parameter_m, len(training_functions[0]),
+                         'This tests requires {}-parameter functions'.format(parameter_m))
+
+        training_function_generator = FunctionGenerator()
+        for function in training_functions:
+            training_function_generator.addFunction(function)
+
+        required_samples = 130
+        training_set = training_function_generator.generate(required_samples)
+
+        ratio = 5
+        fitting_set_x, fitting_set_y, testing_set_x, testing_set_y = self.__mlp_utils.split_data_set(
+            input_number, ratio, required_samples, training_set)
+
+        self.__train_and_plot(fitting_set_x, fitting_set_y, testing_set_x, testing_set_y, parameter_m)
+
+    def test_conductTestM7(self):
+        input_number = 3
+        parameter_m = 7
+
+        # TODO(kaj): provide random function generator (not necessary?)
+        training_functions = [
+            [-3, 0, -7, 21, 0, -8, 24],     # 3x6 – 7x4 + 21x3 – 8x + 24
+            [1, 0, 0, 0, 0, 0, 0],          # x^6
+            [-2, 1, 0, 0, 4, 0, 0],         # -2x^6 + x^5 + 4x^2
+        ]
+
+        self.assertEqual(parameter_m, len(training_functions[0]),
+                         'This tests requires {}-parameter functions'.format(parameter_m))
 
         training_function_generator = FunctionGenerator()
         for function in training_functions:
