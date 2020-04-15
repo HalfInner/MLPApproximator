@@ -1,17 +1,14 @@
 #  Copyright (c) 2020
 #  Kajetan Brzuszczak
-import os
 from contextlib import redirect_stdout
-from datetime import date, datetime
+from datetime import date
 from itertools import product
 from unittest import TestCase
-
-import numpy as np
-from matplotlib import pyplot as plt
 
 from MLPApproximator.MlpActivationFunction import TanhActivationFunction, SigmoidActivationFunction
 from MLPApproximator.MlpApproximatorBuilder import MlpApproximatorBuilder
 from MLPApproximator.MlpFunctionGenerator import FunctionGenerator, TestingSet
+from MLPApproximator.MlpUtils import MlpUtils
 
 
 class TestIntegration(TestCase):
@@ -25,6 +22,10 @@ class TestIntegration(TestCase):
                 b) for each hidden layer(?) conduct tests where you have I=100 epochs of learning heading to 1000
         4) process results for each combination
     """
+
+    def __init__(self, methodName: str = ...) -> None:
+        super().__init__(methodName)
+        self.__mlp_utils = MlpUtils()
 
     def test_conductTestM3(self):
         input_number = 3
@@ -47,34 +48,23 @@ class TestIntegration(TestCase):
         training_set = training_function_generator.generate(required_samples)
 
         ratio = 5
-        fitting_set_x, fitting_set_y, testing_set_x, testing_set_y = self.__split_data_set(
+        fitting_set_x, fitting_set_y, testing_set_x, testing_set_y = self.__mlp_utils.split_data_set(
             input_number, ratio, required_samples, training_set)
 
         self.__train_and_plot(fitting_set_x, fitting_set_y, testing_set_x, testing_set_y, parameter_m)
 
-    def __split_data_set(self, input_number, ratio, required_samples, training_set):
-        fitting_set_x = np.empty((0, input_number))
-        fitting_set_y = np.empty((0, input_number))
-        testing_set_x = np.empty((0, input_number))
-        testing_set_y = np.empty((0, input_number))
-        for idx in range(required_samples):
-            if idx % ratio:
-                fitting_set_x = np.append(fitting_set_x, np.array([training_set.X.T[idx]]), axis=0)
-                fitting_set_y = np.append(fitting_set_y, np.array([training_set.Y.T[idx]]), axis=0)
-            else:
-                testing_set_x = np.append(testing_set_x, np.array([training_set.X.T[idx]]), axis=0)
-                testing_set_y = np.append(testing_set_y, np.array([training_set.Y.T[idx]]), axis=0)
-        return fitting_set_x, fitting_set_y, testing_set_x, testing_set_y
+    def test_runFromDeadline(self):
+        delta = date(2020, 0o4, 0o3) - date.today()
+        self.assertTrue(delta.days >= 0, 'Not this time my friend, night is long... And you\'ve missed your deadline')
 
     def __train_and_plot(self, fitting_set_x, fitting_set_y, testing_set_x, testing_set_y, parameter_m):
-
-        directory = self.__create_date_folder_if_not_exists()
+        directory = self.__mlp_utils.create_date_folder_if_not_exists()
         for sub_test_idx, group_parameter in enumerate(
                 product(range(parameter_m, 10 * parameter_m + 1, parameter_m), range(100, 1000 + 1, 100))):
             input_number = output_number = 3
             hidden_layer_number = group_parameter[0]
             epoch_number = group_parameter[1]
-            # epoch_number = 100
+            # epoch_number = 10
 
             required_samples = fitting_set_x.shape[0] + testing_set_x.shape[0]
             file_name = '{}M{:03}_N{:03}_I{:03}_S{:04}'.format(
@@ -94,61 +84,13 @@ class TestIntegration(TestCase):
                     TestingSet([fitting_set_x, fitting_set_y]),
                     epoch_number=epoch_number)
 
-                plot_name = '{:>3}: M={} Hidden={} Epochs={}'.format(
-                    sub_test_idx, parameter_m, hidden_layer_number, epoch_number)
-                plt.plot(np.ascontiguousarray(np.arange(epoch_number)), metrics.MeanSquaredErrors[0], 'b-',
-                         label='F1 RMSE')
-                plt.plot(np.ascontiguousarray(np.arange(epoch_number)), metrics.MeanSquaredErrors[1], 'r-',
-                         label='F2 RMSE')
-                plt.plot(np.ascontiguousarray(np.arange(epoch_number)), metrics.MeanSquaredErrors[2], 'g-',
-                         label='F3 RMSE')
-                plt.plot(np.ascontiguousarray(np.arange(epoch_number)), metrics.AvgMeanSquaredError, 'm-',
-                         label='Avg RMSE')
-                plt.xlabel('FIT ' + plot_name)
-                plt.ylim(0, np.max(metrics.MeanSquaredErrors) * 1.1)
-                plt.legend()
-                # plt.show()
-                plt.savefig('{}_FIT_MSE.png'.format(file_name))
-                plt.cla()
+                to_file = True
+                plot_name = self.__mlp_utils.plot_rmse(
+                    epoch_number, file_name, hidden_layer_number, metrics, parameter_m, sub_test_idx, to_file)
 
-                plt.plot(fitting_set_x.T[0], fitting_set_y.T[0], 'b-', label='F1 Expected')
-                plt.plot(fitting_set_x.T[0], learned_outputs.T[0], 'y-', label='F1 Predicted')
-                plt.plot(fitting_set_x.T[1], fitting_set_y.T[1], 'g-', label='F2 Expected')
-                plt.plot(fitting_set_x.T[1], learned_outputs.T[1], 'r-', label='F2 Predicted')
-                plt.plot(fitting_set_x.T[2], fitting_set_y.T[2], 'k-', label='F3 Expected')
-                plt.plot(fitting_set_x.T[2], learned_outputs.T[2], 'm-', label='F3 Predicted')
-                plt.xlabel('FIT ' + plot_name + ' {:2.3}%'.format(np.mean(metrics.AvgMeanSquaredError) * 100))
-                plt.ylim(-0.1, 1.1)
-                plt.legend()
-                # plt.show()
-                plt.savefig('{}_FIT_ACC.png'.format(file_name))
-                plt.cla()
+                self.__mlp_utils.plot_learning_approximation(
+                    file_name, fitting_set_x, fitting_set_y, learned_outputs, metrics, plot_name, to_file)
 
-                test_output, loss = mlp_approximator.test(TestingSet([testing_set_x, testing_set_y]))
-                plt.plot(testing_set_x.T[0], testing_set_y.T[0], 'b-', label='F1 Expected')
-                plt.plot(testing_set_x.T[0], test_output.T[0], 'y-',
-                         label='F1 Predicted {:2.3}%'.format(loss[0][0] * 100))
-                plt.plot(testing_set_x.T[1], testing_set_y.T[1], 'g-', label='F2 Expected')
-                plt.plot(testing_set_x.T[1], test_output.T[1], 'r-',
-                         label='F2 Predicted {:2.3}%'.format(loss[1][0] * 100))
-                plt.plot(testing_set_x.T[2], testing_set_y.T[2], 'k-', label='F3 Expected')
-                plt.plot(testing_set_x.T[2], test_output.T[2], 'm-',
-                         label='F3 Predicted {:2.3}%'.format(loss[2][0] * 100))
-                plt.xlabel('TEST ' + plot_name + ' {:2.3}%'.format(np.mean(loss) * 100))
-                plt.ylim(-0.1, 1.1)
-                plt.legend()
-                # plt.show()
-                plt.savefig('{}_TEST_ACC.png'.format(file_name))
-                plt.cla()
+                self.__mlp_utils.plot_testing_approximation(
+                    file_name, mlp_approximator, plot_name, testing_set_x, testing_set_y, to_file)
 
-    def __create_date_folder_if_not_exists(self):
-        today = datetime.now()
-        folder_name = today.strftime('%Y%m%H%M')
-        directory = '..\\TestResults\\' + folder_name + '\\'
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-        return directory
-
-    def test_runFromDeadline(self):
-        delta = date(2020, 0o4, 0o3) - date.today()
-        self.assertTrue(delta.days >= 0, 'Not this time my friend, night is long... And you\'ve missed your deadline')
