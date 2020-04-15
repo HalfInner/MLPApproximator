@@ -63,8 +63,7 @@ class FunctionGenerator:
         else:
             output_set = output_set * 0 + 0.5
 
-        input_set = input_set.copy()
-        input_set.resize(len(self.__function_store), samples_number)
+        input_set = np.resize(input_set, (len(self.__function_store), samples_number))
         return TestingSet([input_set, output_set])
 
     def to_string(self):

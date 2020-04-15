@@ -46,8 +46,8 @@ class TestIntegration(TestCase):
         # normalizing
         fitting_range = 100
         test_range = 20
-        fitting_set_x = training_set.X[:fitting_range]
-        fitting_set_y = training_set.Y[:fitting_range]
+        fitting_set_x = training_set.X[:fitting_range].T
+        fitting_set_y = training_set.Y[:fitting_range].T
 
         # samples = max_samples
         # x = np.arange(samples).reshape([samples, 1]) * 2 * np.pi / samples - np.pi
