@@ -1,6 +1,8 @@
 #  Copyright (c) 2020
 #  Kajetan Brzuszczak
-from datetime import date
+import os
+from contextlib import redirect_stdout
+from datetime import date, datetime
 from itertools import product
 from unittest import TestCase
 
@@ -48,58 +50,70 @@ class TestIntegration(TestCase):
         fitting_set_x = training_set.X[:fitting_range].T
         fitting_set_y = training_set.Y[:fitting_range].T
 
+        directory = self.__create_date_folder_if_not_exists()
         for sub_test_idx, group_parameter in enumerate(
                 product(range(parameter_m, 10 * parameter_m), range(100, 1000, 10))):
             input_number = output_number = 3
             hidden_layer_number = group_parameter[0]
-            # epoch_number = group_parameter[1]
-            epoch_number = 10
+            epoch_number = group_parameter[1]
+            # epoch_number = 10
+            file_name ='{}Out_M{:03}_N{:03}_I{:03}_S{:04}.txt'.format(
+                directory, parameter_m, hidden_layer_number, epoch_number, required_samples)
+            with open(file_name, 'w') as f, redirect_stdout(f):
+                mlp_approximator = MlpApproximatorBuilder() \
+                    .setInputNumber(input_number) \
+                    .setHiddenLayerNumber(hidden_layer_number) \
+                    .setOutputNumber(output_number) \
+                    .setActivationFunctionForHiddenLayer(TanhActivationFunction()) \
+                    .setActivationFunctionForOutputLayer(SigmoidActivationFunction()) \
+                    .setDebugMode(True) \
+                    .build()
 
-            mlp_approximator = MlpApproximatorBuilder() \
-                .setInputNumber(input_number) \
-                .setHiddenLayerNumber(hidden_layer_number) \
-                .setOutputNumber(output_number) \
-                .setActivationFunctionForHiddenLayer(TanhActivationFunction()) \
-                .setActivationFunctionForOutputLayer(SigmoidActivationFunction()) \
-                .setDebugMode(True) \
-                .build()
+                learned_outputs, metrics = mlp_approximator.train(
+                    TestingSet([fitting_set_x, fitting_set_y]),
+                    epoch_number=epoch_number)
 
-            learned_outputs, metrics = mlp_approximator.train(
-                TestingSet([fitting_set_x, fitting_set_y]),
-                epoch_number=epoch_number)
+                plot_name = '{}: M={} Hidden={} Epochs={} Samples={}'.format(
+                    sub_test_idx, parameter_m, hidden_layer_number, epoch_number, required_samples)
+                plt.plot(np.ascontiguousarray(np.arange(epoch_number)), metrics.MeanSquaredErrors[0], 'b-',
+                         label='F1 RMSE')
+                plt.plot(np.ascontiguousarray(np.arange(epoch_number)), metrics.MeanSquaredErrors[1], 'r-',
+                         label='F2 RMSE')
+                plt.plot(np.ascontiguousarray(np.arange(epoch_number)), metrics.MeanSquaredErrors[2], 'g-',
+                         label='F3 RMSE')
+                plt.plot(np.ascontiguousarray(np.arange(epoch_number)), np.mean(metrics.MeanSquaredErrors, axis=0),
+                         'm-',
+                         label='Avg RMSE')
+                plt.xlabel(plot_name)
+                plt.ylim(0, np.max(metrics.MeanSquaredErrors[0]) * 1.1)
+                plt.legend()
+                # plt.show()
+                plt.savefig('{}{:03}MSE.png'.format(directory, required_samples))
+                plt.cla()
 
-            plot_name = '{}: M={} Hidden={} Epochs={} Samples={} HiddenNeurons={}'.format(
-                sub_test_idx, parameter_m, hidden_layer_number, epoch_number, required_samples, hidden_layer_number)
-            plt.plot(np.ascontiguousarray(np.arange(epoch_number)), metrics.MeanSquaredErrors[0], 'b-',
-                     label='F1 RMSE')
-            plt.plot(np.ascontiguousarray(np.arange(epoch_number)), metrics.MeanSquaredErrors[1], 'r-',
-                     label='F2 RMSE')
-            plt.plot(np.ascontiguousarray(np.arange(epoch_number)), metrics.MeanSquaredErrors[2], 'g-',
-                     label='F3 RMSE')
-            plt.plot(np.ascontiguousarray(np.arange(epoch_number)), np.mean(metrics.MeanSquaredErrors, axis=0), 'b-',
-                     label='Avg RMSE')
-            plt.xlabel(plot_name)
-            plt.ylim(0, np.max(metrics.MeanSquaredErrors[0]) * 1.1)
-            plt.legend()
-            # plt.show()
-            path = 'C:\\Users\\kajbr\\OneDrive\\Dokumenty\\StudyTmp\\'
-            plt.savefig('{}{:03}MSE.png'.format(path, required_samples))
-            plt.cla()
-
-            plt.plot(fitting_set_x.T[0], fitting_set_y.T[0], 'b-', label='F1 Expected')
-            plt.plot(fitting_set_x.T[0], learned_outputs.T[0], 'y-', label='F1 Predicted')
-            plt.plot(fitting_set_x.T[1], fitting_set_y.T[1], 'g-', label='F2 Expected')
-            plt.plot(fitting_set_x.T[1], learned_outputs.T[1], 'r-', label='F2 Predicted')
-            plt.plot(fitting_set_x.T[2], fitting_set_y.T[2], 'k-', label='F3 Expected')
-            plt.plot(fitting_set_x.T[2], learned_outputs.T[2], 'm-', label='F3 Predicted')
-            plt.xlabel(plot_name)
-            plt.ylim(-0.1, 1.1)
-            plt.legend()
-            # plt.show()
-            plt.savefig('{}{:03}ACC.png'.format(path, required_samples))
-            plt.cla()
+                plt.plot(fitting_set_x.T[0], fitting_set_y.T[0], 'b-', label='F1 Expected')
+                plt.plot(fitting_set_x.T[0], learned_outputs.T[0], 'y-', label='F1 Predicted')
+                plt.plot(fitting_set_x.T[1], fitting_set_y.T[1], 'g-', label='F2 Expected')
+                plt.plot(fitting_set_x.T[1], learned_outputs.T[1], 'r-', label='F2 Predicted')
+                plt.plot(fitting_set_x.T[2], fitting_set_y.T[2], 'k-', label='F3 Expected')
+                plt.plot(fitting_set_x.T[2], learned_outputs.T[2], 'm-', label='F3 Predicted')
+                plt.xlabel(plot_name)
+                plt.ylim(-0.1, 1.1)
+                plt.legend()
+                # plt.show()
+                plt.savefig('{}{:03}ACC.png'.format(directory, required_samples))
+                plt.cla()
 
             break
+
+    def __create_date_folder_if_not_exists(self):
+        today = datetime.now()
+        h = "00" if today.hour < 12 else "12"
+        folder_name = str(today.strftime('%Y%m%d') + h)
+        directory = '..\\TestResults\\' + folder_name + '\\'
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        return directory
 
     def test_runFromDeadline(self):
         delta = date(2020, 0o4, 0o3) - date.today()
