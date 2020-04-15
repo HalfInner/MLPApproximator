@@ -70,18 +70,12 @@ class Perceptron:
         self.__debug('ExpectedOut=\n{}'.format(expected_out))
         self.__debug('Out=\n{}'.format(self.__output_data))
         diff = expected_out - self.__output_data
-        # TODO(kaj): in another implementation they power up the mean -> not mean the power up
-        # TODO(kaj): this shall be moved into forward propagation
-        # mean_squared_error = np.array([[np.power(np.sum(diff), 2)]])
-        # mean_squared_error = mean_squared_error / np.max(mean_squared_error)
-        # mean_squared_error = np.array([[np.mean(np.array(np.power(np.sum(diff), 2)))]])
-        mean_squared_error = np.sqrt(np.mean(0.5 * np.square(diff), axis=-1, keepdims=True))
+        mean_squared_error = np.sqrt(np.mean(0.5 * np.square(diff), axis=0, keepdims=True)).T
 
         # self.__calculateCorrectionAndWeights(diff * 2)
         empiric_scalar = 0.5
         self.__calculateCorrectionAndWeights(empiric_scalar * diff)
 
-        # TODO(kaj): check dimension of 'correction' -> the length of it increasing alongside the samples number
         return self.__correction, self.__weights, mean_squared_error
 
     def propagateHiddenBackward(self, next_correction, next_weight):
