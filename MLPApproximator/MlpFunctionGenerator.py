@@ -47,18 +47,23 @@ class FunctionGenerator:
         self.__function_store.append(polynomial)
 
     def generate(self, samples_number=1):
-        input_set = np.linspace(-1., 1., samples_number, dtype=float)
+        if samples_number <= 0:
+            raise ValueError('Number of samples must be greater than 0')
 
+        input_set = np.linspace(-1., 1., samples_number, dtype=float)
         output_set = np.empty((0, samples_number), dtype=float)
         for idx, polynomial in enumerate(self.__function_store):
             f_x = lambda x: sum([factor * x ** step for step, factor in enumerate(reversed(polynomial))])
-
             output_set_row = f_x(input_set)
-            if len(output_set_row) > 1:
-                output_set_row = (output_set_row - np.min(output_set_row)) / np.ptp(output_set_row)
-            else:
-                output_set_row = np.array([0.5])
             output_set = np.append(output_set, output_set_row.reshape(1, samples_number), axis=0)
+
+        output_set_range = np.ptp(output_set)
+        if abs(output_set_range) > 0.0000001:
+            output_set = (output_set - np.min(output_set)) / output_set_range
+        else:
+            output_set = output_set * 0 + 0.5
+
+        input_set = input_set.copy()
         input_set.resize(len(self.__function_store), samples_number)
         return TestingSet([input_set, output_set])
 

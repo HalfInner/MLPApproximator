@@ -3,6 +3,8 @@
 
 from unittest import TestCase
 
+import numpy as np
+
 from MLPApproximator.MlpFunctionGenerator import FunctionGenerator
 
 
@@ -61,8 +63,7 @@ class TestFunctionGenerator(TestCase):
         testing_set = function_generator.generate(sample_number)
 
         for function_idx in range(function_number):
-            for sample_idx in range(sample_number):
-                self.assertEqual(2 * sample_idx + base_factor, testing_set.Y[function_idx][sample_idx])
+            self.assertTrue(np.all(np.array([0, 0.5, 1] == testing_set.Y[function_idx])))
 
     def test_generate100ContinuousSamples(self):
         function_generator = FunctionGenerator()
@@ -74,4 +75,4 @@ class TestFunctionGenerator(TestCase):
 
         first_function_idx = 0
         for sample_idx in range(sample_number):
-            self.assertEqual(sample_idx, testing_set.Y[first_function_idx][sample_idx])
+            self.assertAlmostEqual(sample_idx/sample_number, testing_set.Y[first_function_idx][sample_idx], delta=0.011)
