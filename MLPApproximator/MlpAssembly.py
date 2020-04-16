@@ -1,7 +1,6 @@
 #  Copyright (c) 2020
 #  Kajetan Brzuszczak
 import argparse
-import sys
 from fractions import Fraction
 
 from MLPApproximator.MlpActivationFunction import TanhActivationFunction, SigmoidActivationFunction
@@ -99,13 +98,18 @@ class MlpApproximatorAssembler:
                             const=False, default=False,
                             help='Activate Verbose Logging During Test. Default False')
 
-        parser.add_argument('-plot', dest='PlotOn', action='store_const',
-                            const=True, default=True,
+        parser.add_argument('-print_raw', dest='PrintRawOn', action='store',
+                            default=False, type=bool,
+                            help='Print Raw Results to console. Default False')
+
+        parser.add_argument('-plot', dest='PlotOn', action='store',
+                            default=True, type=bool,
                             help='Generates learning charts after work. Default True')
 
         parser.add_argument('-plot_to_file', dest='PlotToFile', action='store', default=None,
                             type=argparse.FileType('r'),
-                            help='Generates learning charts after work to destination. Default True')
+                            help='Generates learning charts after work to destination'
+                                 '\'-plot\' must be set to True. Default None')
 
         parser.add_argument('--version', action='version', version='%(prog)s 0.1a')
 
@@ -115,6 +119,12 @@ class MlpApproximatorAssembler:
 
     def run(self, argv) -> int:
         args, unknown = self.__parser.parse_known_args(argv)
+
+        to_file = False
+        file_name = None
+        if args.PlotToFile is not None:
+            to_file = True
+            file_name = args.PlotToFile
 
         self.__add_function_to_generator(args.f_1)
         self.__add_function_to_generator(args.f_2)
@@ -150,18 +160,24 @@ class MlpApproximatorAssembler:
             TestingSet([fitting_set_x, fitting_set_y]),
             epoch_number=epoch_number)
 
-        to_file = False
-        file_name = None
+        tested_output, loss = mlp_approximator.test(TestingSet([testing_set_x, testing_set_y]))
+
         plot_name = '{:>3}: M={} Hidden={} Epochs={}'.format(
             1, 3, hidden_layer_number, epoch_number)
-        mlp_utils.plot_rmse(epoch_number, file_name, metrics, plot_name, to_file)
 
-        mlp_utils.plot_learning_approximation(
-            file_name, fitting_set_x, fitting_set_y, learned_outputs, metrics, plot_name, to_file)
 
-        test_output, loss = mlp_approximator.test(TestingSet([testing_set_x, testing_set_y]))
-        mlp_utils.plot_testing_approximation(
-            file_name, plot_name, testing_set_x, testing_set_y, test_output, loss, to_file)
+        if args.PlotOn:
+            mlp_utils.plot_rmse(epoch_number, file_name, metrics, plot_name, to_file)
+            mlp_utils.plot_learning_approximation(
+                file_name, fitting_set_x, fitting_set_y, learned_outputs, metrics, plot_name, to_file)
+            mlp_utils.plot_testing_approximation(
+                file_name, plot_name, testing_set_x, testing_set_y, tested_output, loss, to_file)
+
+        if args.PrintRawOn:
+            print('Learned output\n', learned_outputs)
+            print('Metrics\n', metrics.MeanSquaredErrors)
+            print('Tested output\n', learned_outputs)
+            print('Tested Loss\n', loss)
 
         return MlpApproximatorAssembler.EXIT_OK
 
