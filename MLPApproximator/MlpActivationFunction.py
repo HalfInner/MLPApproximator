@@ -9,7 +9,7 @@ class SigmoidActivationFunction:
     Threshold function for the output
     """
 
-    def activate(self, val: np.array):
+    def activate(self, val: np.array) -> np.array:
         return 1. / (1. + np.exp(-val))
 
     def differentiate(self, val: np.array) -> np.array:
@@ -21,7 +21,7 @@ class TanhActivationFunction:
     Threshold function for the output
     """
 
-    def activate(self, val: np.array):
+    def activate(self, val: np.array) -> np.array:
         return np.tanh(val)
 
     def differentiate(self, val: np.array) -> np.array:
@@ -33,7 +33,7 @@ class LinearActivationFunction:
     Linear function for the output
     """
 
-    def activate(self, val: np.array):
+    def activate(self, val: np.array) -> np.array:
         return val
 
     def differentiate(self, val: np.array) -> np.array:
@@ -45,7 +45,7 @@ class ReLUActivationFunction:
     Threshold function for the output
     """
 
-    def activate(self, val: np.array):
+    def activate(self, val: np.array) -> np.array:
         val = val.copy()
         val[val < 0.] = 0.
         return val
