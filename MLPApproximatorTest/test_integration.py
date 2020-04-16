@@ -31,7 +31,6 @@ class TestIntegration(TestCase):
         input_number = output_number = 3
         parameter_m = 3
 
-        # TODO(kaj): provide random function generator (not necessary?)
         training_functions = [
             [1, 1, 0],
             [1, -1, 0],
@@ -58,7 +57,6 @@ class TestIntegration(TestCase):
         input_number = output_number = 3
         parameter_m = 5
 
-        # TODO(kaj): provide random function generator (not necessary?)
         training_functions = [
             [-7, 21, 0, -8, 0.1],  # -7x4 + 21x3 – 8x + 24
             [-20, 0, 0, 0, 2],  # -20x^4 + 2
@@ -85,7 +83,6 @@ class TestIntegration(TestCase):
         input_number = output_number = 3
         parameter_m = 7
 
-        # TODO(kaj): provide random function generator (not necessary?)
         training_functions = [
             [-3, 0, -7, 21, 0, -8, 0.4],    # -3x6 – 7x4 + 21x3 – 8x + 0.4
             [1, 0, 0, -10, 0, 0, 0.2],      # x^6 -x10x^2 + 0.2
@@ -132,6 +129,7 @@ class TestIntegration(TestCase):
                     .setActivationFunctionForHiddenLayer(TanhActivationFunction()) \
                     .setActivationFunctionForOutputLayer(SigmoidActivationFunction()) \
                     .setDebugMode(True) \
+                    .setVerboseDebugMode(False) \
                     .build()
 
                 learned_outputs, metrics = mlp_approximator.train(
