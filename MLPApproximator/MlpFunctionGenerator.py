@@ -11,29 +11,44 @@ class TestingSet:
     First matrix shall contains INPUTS/X
     Second matrix shall contains OUTPUTS/Y
     """
+    X_DATA_IDX = 0
+    Y_DATA_IDX = 1
 
     def __init__(self, data_set) -> None:
         self.__data_set = copy(data_set)
 
     @property
     def X(self):
-        return self.__data_set[0]
+        return self.__data_set[TestingSet.X_DATA_IDX]
 
     @property
     def Y(self):
-        return self.__data_set[1]
+        return self.__data_set[TestingSet.Y_DATA_IDX]
 
     @property
     def Input(self):
-        return self.__data_set[0]
+        return self.__data_set[TestingSet.X_DATA_IDX]
 
     @property
     def Output(self):
-        return self.__data_set[1]
+        return self.__data_set[TestingSet.Y_DATA_IDX]
+
+    def to_string(self):
+        parsed_data_set = "# Auto Generated Data Set by MLP Approximator \n" \
+                          "# Tabs are used to seperated each data \n" \
+                          "# First line contains header with the number of input and output \n" \
+                          "# Remaining part is the raw data \n"
+        parsed_data_set += str(len(self.__data_set[TestingSet.X_DATA_IDX][0])) + ' '
+        parsed_data_set += str(len(self.__data_set[TestingSet.Y_DATA_IDX][0])) + '\n'
+
+        for input_line, output_line in zip(self.__data_set[TestingSet.X_DATA_IDX],
+                                           self.__data_set[TestingSet.Y_DATA_IDX]):
+            parsed_data_set += '\t'.join(map(str, input_line)) + '\t' + '\t'.join(map(str, output_line)) + '\n'
+
+        return parsed_data_set
 
 
 class FunctionGenerator:
-
     def __init__(self) -> None:
         self.__function_store = []
 

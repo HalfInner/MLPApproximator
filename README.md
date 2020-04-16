@@ -1,5 +1,6 @@
 # MLPApproximator
-Research how number of perceptrons against of it quality. Backward error propagation. 
+Research how number of perceptrons influance on approximation quality.
+Backward error propagation. 
 
 ## Requirements [PL]
 Projekt jest rozliczany na podstawie:

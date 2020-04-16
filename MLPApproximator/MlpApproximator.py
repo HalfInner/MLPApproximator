@@ -57,6 +57,12 @@ class MlpApproximator:
         self.__output = None
 
     def train(self, train_data_set: TestingSet, epoch_number=1):
+        """
+
+        :param train_data_set:
+        :param epoch_number:
+        :return:
+        """
         if epoch_number <= 0:
             raise RuntimeError('Epoch must be at least one')
 
@@ -75,9 +81,9 @@ class MlpApproximator:
             epoch_time_start = timer()
 
             self.__debug('Epoch:{:>5}/{:<5}'.format(epoch + 1, epoch_number))
-            self.__output = self.propagateForward(inputs_with_bias)
+            self.__output = self.__propagateForward(inputs_with_bias)
             loss = self.__calculate_rmse(train_data_set.Output)
-            correction = self.propagateErrorBackward(train_data_set.Output)
+            correction = self.__propagateErrorBackward(train_data_set.Output)
 
             epoch_time_stop = timer()
 
@@ -95,6 +101,22 @@ class MlpApproximator:
         self.__output = self.__p2.output()
         return self.__output, metrics
 
+    def test(self, test_data_set: TestingSet):
+        """
+
+        :param test_data_set:
+        :return:
+        """
+        self.__debug('Testing: ')
+        inputs_with_bias = self.__create_input_with_biases(test_data_set)
+
+        self.__output = self.__propagateForward(inputs_with_bias)
+        loss = self.__calculate_rmse(test_data_set.Output)
+        self.__debug('\tLoss={:2.3}%'.format(np.mean(loss) * 100))
+        if self.__debug__level_2_on:
+            self.__debug('\tCurrent denormalized output=\n{}'.format(self.__p2.output()))
+        return self.__output, loss
+
     def __create_input_with_biases(self, train_data_set):
         inputs_with_bias = train_data_set.Input
         if self.__bias_number > 0:
@@ -104,38 +126,17 @@ class MlpApproximator:
                 axis=1)
         return inputs_with_bias
 
-    def test(self, test_data_set: TestingSet):
-        self.__debug('Testing: ')
-        inputs_with_bias = self.__create_input_with_biases(test_data_set)
-
-        self.__output = self.propagateForward(inputs_with_bias)
-        loss = self.__calculate_rmse(test_data_set.Output)
-        self.__debug('\tLoss={:2.3}%'.format(np.mean(loss) * 100))
-        if self.__debug__level_2_on:
-            self.__debug('\tCurrent denormalized output=\n{}'.format(self.__p2.output()))
-        return self.__output, loss
-
     def __calculate_rmse(self, expected_out):
         loss = np.sqrt(np.mean(0.5 * np.square(expected_out - self.__p2.output()), axis=0, keepdims=True)).T
         if self.__debug__level_2_on:
             self.__debug('Loss=\n{}'.format(loss))
         return loss
 
-    def propagateForward(self, input_data):
-        """
-        Might be converted to private
-
-        :param input_data:
-        """
+    def __propagateForward(self, input_data):
         p1_out = self.__p1.forwardPropagation(input_data)
         return self.__p2.forwardPropagation(p1_out)
 
-    def propagateErrorBackward(self, expected_output_data: np.array):
-        """
-        Might be converted to private
-
-        :param expected_output_data:
-        """
+    def __propagateErrorBackward(self, expected_output_data: np.array):
         correction, weight = self.__p2.propagateBackward(expected_output_data)
         self.__p1.propagateHiddenBackward(correction, weight)
 

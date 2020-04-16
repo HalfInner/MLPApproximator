@@ -48,13 +48,9 @@ class MlpApproximatorAssembler:
                             default=3, type=int,
                             help='Set number of training iterations. Default 3.')
 
-        parser.add_argument('-s', '--sample_number', dest='SampleNumber', action='store',
-                            default=100, type=int,
-                            help='Set number of samples to generate by -arg_f[1,2,3]. Default 3.')
-
-        parser.add_argument('-r', '--ratio', dest='Ratio', action='store',
-                            default=5, type=int,
-                            help='Set ratio of splitting dataset. Threat each r-th sample sa test set. Default 5 (1:4)')
+        parser.add_argument('-n', '--hidden_layer_neurons', dest='HiddenLayerNeurons', action='store',
+                            default=3, type=int,
+                            help='Number of neurons on hidden layer. Default 3.')
 
         parser.add_argument('-hf', '--hidden_layer_activation_function',
                             choices=['tanh', 'sigmoid', 'relu', 'linear'],
@@ -67,7 +63,7 @@ class MlpApproximatorAssembler:
                             default='sigmoid', choices=['tanh', 'sigmoid', 'relu', 'linear'],
                             help='Activate normalization over data set into range [0,1]. Default True.')
 
-        parser.add_argument('-ds', '--data_set', dest='DataSetFile', action='store', default=None,
+        parser.add_argument('-ds', '--data_set', dest='DataSetFileHandler', action='store', default=None,
                             type=argparse.FileType('r'),
                             help='First line is a header with metadata. Determine number of input and number of output'
                                  ' e.g. \'2 3\' in first line means that there is 2 inputs and 3 outputs'
@@ -93,6 +89,18 @@ class MlpApproximatorAssembler:
                             default=[],
                             help='Generate function. Polynomials Representation. Each number represent one of factor. '
                                  'Counting from right to left. To avoid factor, use 0. Generate one output')
+
+        parser.add_argument('-s', '--sample_number', dest='SampleNumber', action='store',
+                            default=100, type=int,
+                            help='Set number of samples to generate by -arg_f[1,2,3]. Default 3.')
+
+        parser.add_argument('-r', '--ratio', dest='Ratio', action='store',
+                            default=5, type=int,
+                            help='Set ratio of splitting dataset. Threat each r-th sample sa test set. Default 5 (1:4)')
+
+        parser.add_argument('-sds', '--save_data_set_to_file', dest='SaveDataSetFileHandler', action='store',
+                            default=None, type=argparse.FileType('w'),
+                            help='Save result of generation into the passed file. Apply to -arg_3[1,2,3]')
 
         parser.add_argument('-l1', '--log_level_1', dest='LogLevel1On', action='store_const',
                             const=sum, default=True,
@@ -133,10 +141,14 @@ class MlpApproximatorAssembler:
         ratio = args.Ratio
 
         input_number, output_number, required_samples, training_set = None, None, None, None
-        if not args.DataSetFile:
+        if not args.DataSetFileHandler:
             input_number, output_number, required_samples, training_set = self.__generate_functions(args)
         else:
-            input_number, output_number, required_samples, training_set = self.__parse_data_set_file(args.DataSetFile)
+            input_number, output_number, required_samples, training_set = self.__parse_data_set_file(
+                args.DataSetFileHandler)
+
+        if args.SaveDataSetFileHandler:
+            args.SaveDataSetFileHandler.write(training_set.to_string())
 
         fitting_set_x, fitting_set_y, testing_set_x, testing_set_y = self.__mlp_utils.split_data_set(
             input_number, output_number, ratio, required_samples, training_set)
