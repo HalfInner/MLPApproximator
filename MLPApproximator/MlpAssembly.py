@@ -33,28 +33,24 @@ class MlpApproximatorAssembler:
             description='MLP Neural Network Function Approximation.\n'
                         'E.g. usage:\n\tpython %(prog)s -arg_f1 1/2 -arg_f1 2 -arg_f1 0 -arg_f2 3 -arg_f1 2 -arg_f3 1')
 
-        parser.add_argument('-norm', '--normalize_set', dest='NormalizeSet', action='store_const',
-                            const=True, default=True,
-                            help='Activate normalization over data set into range [0,1]. Default True.')
-
-        parser.add_argument('-n', '--hidden_layer_neurons', dest='HiddenLayerNeurons', action='store_const',
-                            const=3, default=3,
+        parser.add_argument('-n', '--hidden_layer_neurons', dest='HiddenLayerNeurons', action='store',
+                            default=3, type=int,
                             help='Number of neurons on hidden layer. Default 3.')
 
-        parser.add_argument('-b', '--use_biases', dest='UseBiases', action='store_const',
-                            const=True, default=True,
+        parser.add_argument('-b', '--use_biases', dest='UseBiases', action='store',
+                            default=True, type=self.__str2bool, nargs='?',
                             help='Activate normalization over data set into range [0,1]. Default True.')
 
         parser.add_argument('-e', '--epoch_number', dest='EpochNumber', action='store',
                             default=3, type=int,
                             help='Set number of training iterations. Default 3.')
 
-        parser.add_argument('-s', '--sample_number', dest='SampleNumber', action='store_const',
-                            const=100, default=100,
+        parser.add_argument('-s', '--sample_number', dest='SampleNumber', action='store',
+                            default=100, type=int,
                             help='Set number of samples to generate by -arg_f[1,2,3]. Default 3.')
 
-        parser.add_argument('-r', '--ratio', dest='Ratio', action='store_const',
-                            const=5, default=5,
+        parser.add_argument('-r', '--ratio', dest='Ratio', action='store',
+                            default=5, type=int,
                             help='Set ratio of splitting dataset. Threat each r sample sa test set. Default 5 (1:4).')
 
         parser.add_argument('-hf', '--hidden_layer_activation_function',
@@ -78,6 +74,11 @@ class MlpApproximatorAssembler:
                                  '\'1 2 3 4 5\' in second line means that first two columns colums are the input, '
                                  'and last two are the expected output')
 
+        parser.add_argument('-norm', '--normalize_set', dest='NormalizeSet', action='store',
+                            default=True, type=self.__str2bool, nargs='?',
+                            help='Activate normalization over data set into range [0,1]. '
+                                 'Data set must be provided first Default True.')
+
         parser.add_argument('-arg_f1', '--arguments_function_1', dest='f_1', action='append',
                             default=[],
                             help='Generate function. Polynomials Representation. Each number represent one of factors. '
@@ -100,11 +101,11 @@ class MlpApproximatorAssembler:
                             help='Activate Verbose Logging During Test. Default False')
 
         parser.add_argument('-print_raw', dest='PrintRawOn', action='store',
-                            default=False, type=bool,
+                            default=False, type=self.__str2bool, nargs='?',
                             help='Print Raw Results to console. Default False')
 
         parser.add_argument('-plot', dest='PlotOn', action='store',
-                            default=True, type=bool,
+                            default=True, type=self.__str2bool, nargs='?',
                             help='Generates learning charts after work. Default True')
 
         parser.add_argument('-plot_to_file', dest='PlotToFile', action='store', default=None,
@@ -130,8 +131,6 @@ class MlpApproximatorAssembler:
         self.__add_function_to_generator(args.f_1)
         self.__add_function_to_generator(args.f_2)
         self.__add_function_to_generator(args.f_3)
-
-
 
         training_function_generator = FunctionGenerator()
         for function in self.__training_functions:
@@ -202,3 +201,14 @@ class MlpApproximatorAssembler:
         f_out = [float(Fraction(x)) for x in f]
         self.__training_functions.append(f_out)
         self.__input_number += 1
+
+    def __str2bool(self, v):
+        # https://stackoverflow.com/questions/15008758/parsing-boolean-values-with-argparse
+        if isinstance(v, bool):
+            return v
+        if v.lower() in ('yes', 'true', 't', 'y', '1'):
+            return True
+        elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+            return False
+        else:
+            raise argparse.ArgumentTypeError('Boolean value expected.')
