@@ -41,12 +41,12 @@ class MlpApproximatorAssembler:
                             const=3, default=3,
                             help='Number of neurons on hidden layer. Default 3.')
 
-        parser.add_argument('-b', '--use_biases', dest='Biases', action='store_const',
+        parser.add_argument('-b', '--use_biases', dest='UseBiases', action='store_const',
                             const=True, default=True,
                             help='Activate normalization over data set into range [0,1]. Default True.')
 
-        parser.add_argument('-e', '--epoch_number', dest='EpochNumber', action='store_const',
-                            const=1, default=1,
+        parser.add_argument('-e', '--epoch_number', dest='EpochNumber', action='store',
+                            default=3, type=int,
                             help='Set number of training iterations. Default 3.')
 
         parser.add_argument('-s', '--sample_number', dest='SampleNumber', action='store_const',
@@ -103,6 +103,10 @@ class MlpApproximatorAssembler:
                             const=True, default=True,
                             help='Generates learning charts after work. Default True')
 
+        parser.add_argument('-plot_to_file', dest='PlotToFile', action='store', default=None,
+                            type=argparse.FileType('r'),
+                            help='Generates learning charts after work to destination. Default True')
+
         parser.add_argument('--version', action='version', version='%(prog)s 0.1a')
 
         self.__parser = parser
@@ -116,30 +120,30 @@ class MlpApproximatorAssembler:
         self.__add_function_to_generator(args.f_2)
         self.__add_function_to_generator(args.f_3)
 
-        # normal_logging_on = args.LogLevel1On
-
         training_function_generator = FunctionGenerator()
         for function in self.__training_functions:
             training_function_generator.addFunction(function)
 
-        required_samples = 130
+        required_samples = args.SampleNumber
         training_set = training_function_generator.generate(required_samples)
 
-        ratio = 5
+        ratio = args.Ratio
         input_number = output_number = self.__input_number
         mlp_utils = MlpUtils()
         fitting_set_x, fitting_set_y, testing_set_x, testing_set_y = mlp_utils.split_data_set(
             input_number, output_number, ratio, required_samples, training_set)
 
-        hidden_layer_number = 3
-        epoch_number = 1
+        hidden_layer_number = args.HiddenLayerNeurons
+        epoch_number = args.EpochNumber
         mlp_approximator = MlpApproximatorBuilder() \
             .setInputNumber(input_number) \
             .setHiddenLayerNumber(hidden_layer_number) \
             .setOutputNumber(output_number) \
             .setActivationFunctionForHiddenLayer(TanhActivationFunction()) \
             .setActivationFunctionForOutputLayer(SigmoidActivationFunction()) \
-            .setDebugMode(True) \
+            .setDebugMode(args.LogLevel1On) \
+            .setVerboseDebugMode(args.LogLevel2On) \
+            .setUseBiases(args.UseBiases) \
             .build()
 
         learned_outputs, metrics = mlp_approximator.train(

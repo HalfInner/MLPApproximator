@@ -9,12 +9,6 @@ class SigmoidActivationFunction:
     Threshold function for the output
     """
 
-    def __init__(self) -> None:
-        super().__init__()
-
-    def __call__(self, val) -> float:
-        return self.activate(val)
-
     def activate(self, val: np.array):
         return 1. / (1. + np.exp(-val))
 
@@ -27,14 +21,35 @@ class TanhActivationFunction:
     Threshold function for the output
     """
 
-    def __init__(self) -> None:
-        super().__init__()
-
-    def __call__(self, val) -> float:
-        return self.__activate(val)
-
     def activate(self, val: np.array):
         return np.tanh(val)
 
     def differentiate(self, val: np.array) -> np.array:
         return 1 - self.activate(val) ** 2
+
+
+class LinearActivationFunction:
+    """
+    Linear function for the output
+    """
+
+    def activate(self, val: np.array):
+        return val
+
+    def differentiate(self, val: np.array) -> np.array:
+        return 1
+
+
+class ReLUActivationFunction:
+    """
+    Threshold function for the output
+    """
+
+    def activate(self, val: np.array):
+        val[val < 0.] = 0.
+        return
+
+    def differentiate(self, val: np.array) -> np.array:
+        val[val < 0] = 0
+        val[val >= 0] = 0
+        return val
