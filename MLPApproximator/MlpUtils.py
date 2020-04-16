@@ -31,9 +31,9 @@ class MlpUtils:
                 output_number, len(training_set.Y.T[0])))
 
         fitting_set_x = np.empty((0, input_number))
-        fitting_set_y = np.empty((0, input_number))
+        fitting_set_y = np.empty((0, output_number))
         testing_set_x = np.empty((0, input_number))
-        testing_set_y = np.empty((0, input_number))
+        testing_set_y = np.empty((0, output_number))
         for idx in range(required_samples):
             if idx % ratio:
                 fitting_set_x = np.append(fitting_set_x, np.array([training_set.X[idx]]), axis=0)

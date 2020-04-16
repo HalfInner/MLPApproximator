@@ -74,14 +74,12 @@ class MlpApproximatorAssembler:
         parser.add_argument('-ds', '--data_set', dest='DataSetFile', action='store', default=None,
                             type=argparse.FileType('r'),
                             help='First line is a header with metadata. Determine number of input and number of output'
-                                 '\'2 3\' in first line. Means that there is 4 inputs and 4 outputs'
+                                 ' e.g. \'2 3\' in first line means that there is 2 inputs and 3 outputs'
                                  'Parser accepts text file where each column is separated by whitespace(\' \') '
-                                 'or tabulation(\'\\t\'). '
-                                 'Each row is separated by new line(\'\\n\'). '
+                                 'or tabulation(\'\\t\'). Each row is separated by new line(\'\\n\'). '
                                  'One column is interpreted as one input or one output.'
                                  '\'1 2 3 4 5\' in second line means that first two columns colums are the input, '
-                                 'and last two are the expected output'
-                                 '\'#\' character threat as comment'
+                                 'and last two are the expected output. The \'\'#\' character threat as comment'
                                  'Using file as input excludes usage of function generator')
 
         parser.add_argument('-norm', '--normalize_set', dest='NormalizeSet', action='store',
@@ -220,7 +218,7 @@ class MlpApproximatorAssembler:
             if not line:
                 continue
 
-            elements = line.replace('\t', ' ').split(' ')
+            elements = line.strip().replace('\t', ' ').split(' ')
             is_comment = elements[0].lstrip()[0] == '#'
             if is_comment:
                 continue
@@ -236,6 +234,9 @@ class MlpApproximatorAssembler:
 
                 is_header_read = True
                 continue
+            if len(elements) != (input_number + output_number):
+                raise RuntimeError('Number of columns={} must equals to inputs number={} and outputs number={}'
+                                   .format(len(elements), input_number, output_number))
 
             input_data = np.append(input_data, [elements[:input_number]], axis=0)
             output_data = np.append(output_data, [elements[input_number:]], axis=0)
