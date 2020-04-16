@@ -131,7 +131,6 @@ class MlpApproximatorAssembler:
         fitting_set_x, fitting_set_y, testing_set_x, testing_set_y = mlp_utils.split_data_set(
             input_number, output_number, ratio, required_samples, training_set)
 
-        input_number = output_number = 1
         hidden_layer_number = 3
         epoch_number = 1
         mlp_approximator = MlpApproximatorBuilder() \

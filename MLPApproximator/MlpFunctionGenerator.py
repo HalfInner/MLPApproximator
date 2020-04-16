@@ -36,7 +36,6 @@ class FunctionGenerator:
 
     def __init__(self) -> None:
         self.__function_store = []
-        pass
 
     def addFunction(self, polynomial):
         """
