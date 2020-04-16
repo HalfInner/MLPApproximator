@@ -47,6 +47,9 @@ class FunctionGenerator:
         self.__function_store.append(polynomial)
 
     def generate(self, samples_number=1):
+        if not self.__function_store:
+            raise ValueError('You must add some functions before start')
+
         if samples_number <= 0:
             raise ValueError('Number of samples must be greater than 0')
 

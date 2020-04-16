@@ -1,10 +1,13 @@
 #  Copyright (c) 2020
 #  Kajetan Brzuszczak
 import argparse
+import sys
+from fractions import Fraction
 
 from MLPApproximator.MlpActivationFunction import TanhActivationFunction, SigmoidActivationFunction
 from MLPApproximator.MlpApproximatorBuilder import MlpApproximatorBuilder
-from MLPApproximator.MlpFunctionGenerator import FunctionGenerator
+from MLPApproximator.MlpFunctionGenerator import FunctionGenerator, TestingSet
+from MLPApproximator.MlpUtils import MlpUtils
 
 
 class MlpApproximatorAssembler:
@@ -23,6 +26,7 @@ class MlpApproximatorAssembler:
             return 0
          ``
     """
+    EXIT_OK = 0
 
     def __init__(self):
         parser = argparse.ArgumentParser(
@@ -40,6 +44,18 @@ class MlpApproximatorAssembler:
         parser.add_argument('-b', '--use_biases', dest='Biases', action='store_const',
                             const=True, default=True,
                             help='Activate normalization over data set into range [0,1]. Default True.')
+
+        parser.add_argument('-e', '--epoch_number', dest='EpochNumber', action='store_const',
+                            const=1, default=1,
+                            help='Set number of training iterations. Default 3.')
+
+        parser.add_argument('-s', '--sample_number', dest='SampleNumber', action='store_const',
+                            const=100, default=100,
+                            help='Set number of samples to generate by -arg_f[1,2,3]. Default 3.')
+
+        parser.add_argument('-r', '--ratio', dest='Ratio', action='store_const',
+                            const=5, default=5,
+                            help='Set ratio of splitting dataset. Threat each r sample sa test set. Default 5 (1:4).')
 
         parser.add_argument('-hf', '--hidden_layer_activation_function',
                             choices=['tanh', 'sigmoid', 'relu', 'linear'],
@@ -90,27 +106,34 @@ class MlpApproximatorAssembler:
         parser.add_argument('--version', action='version', version='%(prog)s 0.1a')
 
         self.__parser = parser
+        self.__training_functions = []
+        self.__input_number = 0
 
     def run(self, argv) -> int:
         args, unknown = self.__parser.parse_known_args(argv)
 
-        training_functions = []
-        if args.f_1 is not None:
-            training_functions.append(args.f_1)
+        self.__add_function_to_generator(args.f_1)
+        self.__add_function_to_generator(args.f_2)
+        self.__add_function_to_generator(args.f_3)
+
+        # normal_logging_on = args.LogLevel1On
 
         training_function_generator = FunctionGenerator()
-        for function in training_functions:
+        for function in self.__training_functions:
             training_function_generator.addFunction(function)
 
         required_samples = 130
         training_set = training_function_generator.generate(required_samples)
 
         ratio = 5
-        fitting_set_x, fitting_set_y, testing_set_x, testing_set_y = self.__mlp_utils.split_data_set(
-            input_number, ratio, required_samples, training_set)
+        input_number = output_number = self.__input_number
+        mlp_utils = MlpUtils()
+        fitting_set_x, fitting_set_y, testing_set_x, testing_set_y = mlp_utils.split_data_set(
+            input_number, output_number, ratio, required_samples, training_set)
 
         input_number = output_number = 1
         hidden_layer_number = 3
+        epoch_number = 1
         mlp_approximator = MlpApproximatorBuilder() \
             .setInputNumber(input_number) \
             .setHiddenLayerNumber(hidden_layer_number) \
@@ -124,15 +147,26 @@ class MlpApproximatorAssembler:
             TestingSet([fitting_set_x, fitting_set_y]),
             epoch_number=epoch_number)
 
-        to_file = True
-
+        to_file = False
+        file_name = None
         plot_name = '{:>3}: M={} Hidden={} Epochs={}'.format(
-            sub_test_idx, parameter_m, hidden_layer_number, epoch_number)
-        self.__mlp_utils.plot_rmse(epoch_number, file_name, metrics, plot_name, to_file)
+            1, 3, hidden_layer_number, epoch_number)
+        mlp_utils.plot_rmse(epoch_number, file_name, metrics, plot_name, to_file)
 
-        self.__mlp_utils.plot_learning_approximation(
+        mlp_utils.plot_learning_approximation(
             file_name, fitting_set_x, fitting_set_y, learned_outputs, metrics, plot_name, to_file)
 
         test_output, loss = mlp_approximator.test(TestingSet([testing_set_x, testing_set_y]))
-        self.__mlp_utils.plot_testing_approximation(
+        mlp_utils.plot_testing_approximation(
             file_name, plot_name, testing_set_x, testing_set_y, test_output, loss, to_file)
+
+        return MlpApproximatorAssembler.EXIT_OK
+
+    def __add_function_to_generator(self, f):
+        f_is_exists = f is not None and f
+        if not f_is_exists:
+            return
+
+        f_out = [float(Fraction(x)) for x in f]
+        self.__training_functions.append(f_out)
+        self.__input_number += 1

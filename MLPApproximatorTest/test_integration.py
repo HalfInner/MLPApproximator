@@ -28,7 +28,7 @@ class TestIntegration(TestCase):
         self.__mlp_utils = MlpUtils()
 
     def test_conductTestM3(self):
-        input_number = 3
+        input_number = output_number = 3
         parameter_m = 3
 
         # TODO(kaj): provide random function generator (not necessary?)
@@ -50,12 +50,12 @@ class TestIntegration(TestCase):
 
         ratio = 5
         fitting_set_x, fitting_set_y, testing_set_x, testing_set_y = self.__mlp_utils.split_data_set(
-            input_number, ratio, required_samples, training_set)
+            input_number, output_number, ratio, required_samples, training_set)
 
         self.__train_and_plot(fitting_set_x, fitting_set_y, testing_set_x, testing_set_y, parameter_m)
 
     def test_conductTestM5(self):
-        input_number = 3
+        input_number = output_number = 3
         parameter_m = 5
 
         # TODO(kaj): provide random function generator (not necessary?)
@@ -77,12 +77,12 @@ class TestIntegration(TestCase):
 
         ratio = 5
         fitting_set_x, fitting_set_y, testing_set_x, testing_set_y = self.__mlp_utils.split_data_set(
-            input_number, ratio, required_samples, training_set)
+            input_number, output_number, ratio, required_samples, training_set)
 
         self.__train_and_plot(fitting_set_x, fitting_set_y, testing_set_x, testing_set_y, parameter_m)
 
     def test_conductTestM7(self):
-        input_number = 3
+        input_number = output_number = 3
         parameter_m = 7
 
         # TODO(kaj): provide random function generator (not necessary?)
@@ -104,7 +104,7 @@ class TestIntegration(TestCase):
 
         ratio = 5
         fitting_set_x, fitting_set_y, testing_set_x, testing_set_y = self.__mlp_utils.split_data_set(
-            input_number, ratio, required_samples, training_set)
+            input_number, output_number, ratio, required_samples, training_set)
 
         self.__train_and_plot(fitting_set_x, fitting_set_y, testing_set_x, testing_set_y, parameter_m)
 
@@ -119,7 +119,6 @@ class TestIntegration(TestCase):
             input_number = output_number = 3
             hidden_layer_number = group_parameter[0]
             epoch_number = group_parameter[1]
-            # epoch_number = 10
 
             required_samples = fitting_set_x.shape[0] + testing_set_x.shape[0]
             file_name = '{}M{:03}_N{:03}_I{:03}_S{:04}'.format(
@@ -151,4 +150,3 @@ class TestIntegration(TestCase):
                 test_output, loss = mlp_approximator.test(TestingSet([testing_set_x, testing_set_y]))
                 self.__mlp_utils.plot_testing_approximation(
                     file_name, plot_name, testing_set_x, testing_set_y, test_output, loss, to_file)
-            break

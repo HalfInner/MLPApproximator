@@ -8,7 +8,7 @@ from matplotlib import pyplot as plt
 class MlpUtils:
     """MLP Utils"""
 
-    def split_data_set(self, input_number, ratio, required_samples, training_set):
+    def split_data_set(self, input_number, output_number, ratio, required_samples, training_set):
         """
 
         :param input_number:
@@ -17,6 +17,18 @@ class MlpUtils:
         :param training_set:
         :return:
         """
+        if ratio < 1:
+            minimum_required_ratio = 1
+            raise ValueError('Ratio must be great or equal to {}'.format(minimum_required_ratio))
+
+        if len(training_set.X.T[0]) != input_number:
+            raise ValueError('Input number={} and data set input number={} must be equal'.format(
+                input_number, len(training_set.X.T[0])))
+
+        if len(training_set.Y.T[0]) != output_number:
+            raise ValueError('Output number={} and data set output number={} must be equal'.format(
+                output_number, len(training_set.Y.T[0])))
+
         fitting_set_x = np.empty((0, input_number))
         fitting_set_y = np.empty((0, input_number))
         testing_set_x = np.empty((0, input_number))
