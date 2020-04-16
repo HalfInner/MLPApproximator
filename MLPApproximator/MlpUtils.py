@@ -72,6 +72,7 @@ class MlpUtils:
         :param plot_name:
         :param to_file:
         """
+
         plt.plot(fitting_set_x.T[0], fitting_set_y.T[0], 'b-', label='F1 Expected')
         plt.plot(fitting_set_x.T[0], learned_outputs.T[0], 'y-',
                  label='F1 Predicted {:2.3}%'.format(metrics.MeanSquaredErrors[0][-1] * 100))
@@ -96,22 +97,16 @@ class MlpUtils:
 
         :param epoch_number:
         :param file_name:
-        :param hidden_layer_number:
         :param metrics:
-        :param parameter_m:
-        :param sub_test_idx:
+        :param plot_name:
         :param to_file:
         :return:
         """
-        plt.plot(np.ascontiguousarray(np.arange(epoch_number)), metrics.MeanSquaredErrors[0], 'b-',
-                 label='F1 RMSE')
-        plt.plot(np.ascontiguousarray(np.arange(epoch_number)), metrics.MeanSquaredErrors[1], 'r-',
-                 label='F2 RMSE')
-        plt.plot(np.ascontiguousarray(np.arange(epoch_number)), metrics.MeanSquaredErrors[2], 'g-',
-                 label='F3 RMSE')
-        plt.plot(np.ascontiguousarray(np.arange(epoch_number)), metrics.AvgMeanSquaredError, 'm-',
-                 label='Avg RMSE')
-        plt.plot(np.ascontiguousarray(np.arange(epoch_number)), metrics.AvgMeanSquaredError, '-',
+        for idx, mse in enumerate(metrics.MeanSquaredErrors):
+            plt.plot(np.ascontiguousarray(np.arange(epoch_number)), mse, '-',
+                     label='F{} RMSE'.format(idx))
+
+        plt.plot(np.ascontiguousarray(np.arange(epoch_number)), metrics.AvgMeanSquaredError, 'r-',
                  label='Avg RMSE')
         plt.xlabel('FIT ' + plot_name)
         plt.ylim(0, np.max(metrics.MeanSquaredErrors) * 1.1)
