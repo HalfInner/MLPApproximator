@@ -3,7 +3,8 @@
 import argparse
 from fractions import Fraction
 
-from MLPApproximator.MlpActivationFunction import TanhActivationFunction, SigmoidActivationFunction
+from MLPApproximator.MlpActivationFunction import TanhActivationFunction, SigmoidActivationFunction, \
+    ReLUActivationFunction, LinearActivationFunction
 from MLPApproximator.MlpApproximatorBuilder import MlpApproximatorBuilder
 from MLPApproximator.MlpFunctionGenerator import FunctionGenerator, TestingSet
 from MLPApproximator.MlpUtils import MlpUtils
@@ -130,6 +131,8 @@ class MlpApproximatorAssembler:
         self.__add_function_to_generator(args.f_2)
         self.__add_function_to_generator(args.f_3)
 
+
+
         training_function_generator = FunctionGenerator()
         for function in self.__training_functions:
             training_function_generator.addFunction(function)
@@ -143,14 +146,25 @@ class MlpApproximatorAssembler:
         fitting_set_x, fitting_set_y, testing_set_x, testing_set_y = mlp_utils.split_data_set(
             input_number, output_number, ratio, required_samples, training_set)
 
+        activation_function_map = {
+            'tanh': TanhActivationFunction(),
+            'sigmoid': SigmoidActivationFunction(),
+            'relu': ReLUActivationFunction(),
+            'linear': LinearActivationFunction(),
+            None: SigmoidActivationFunction()
+        }
+
+        hidden_layer_activation_function = activation_function_map[args.HiddenLayerFunction]
+        output_layer_activation_function = activation_function_map[args.OutputLayerFunction]
+
         hidden_layer_number = args.HiddenLayerNeurons
         epoch_number = args.EpochNumber
         mlp_approximator = MlpApproximatorBuilder() \
             .setInputNumber(input_number) \
             .setHiddenLayerNumber(hidden_layer_number) \
             .setOutputNumber(output_number) \
-            .setActivationFunctionForHiddenLayer(TanhActivationFunction()) \
-            .setActivationFunctionForOutputLayer(SigmoidActivationFunction()) \
+            .setActivationFunctionForHiddenLayer(hidden_layer_activation_function) \
+            .setActivationFunctionForOutputLayer(output_layer_activation_function) \
             .setDebugMode(args.LogLevel1On) \
             .setVerboseDebugMode(args.LogLevel2On) \
             .setUseBiases(args.UseBiases) \
@@ -164,7 +178,6 @@ class MlpApproximatorAssembler:
 
         plot_name = '{:>3}: M={} Hidden={} Epochs={}'.format(
             1, 3, hidden_layer_number, epoch_number)
-
 
         if args.PlotOn:
             mlp_utils.plot_rmse(epoch_number, file_name, metrics, plot_name, to_file)

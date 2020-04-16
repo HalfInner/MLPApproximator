@@ -46,10 +46,12 @@ class ReLUActivationFunction:
     """
 
     def activate(self, val: np.array):
+        val = val.copy()
         val[val < 0.] = 0.
-        return
+        return val
 
     def differentiate(self, val: np.array) -> np.array:
+        val = val.copy()
         val[val < 0] = 0
-        val[val >= 0] = 0
+        val[val >= 0] = 1
         return val
