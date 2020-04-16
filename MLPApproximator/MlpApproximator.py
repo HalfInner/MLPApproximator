@@ -60,8 +60,11 @@ class MlpApproximator:
         if epoch_number <= 0:
             raise RuntimeError('Epoch must be at least one')
 
-        if np.any(np.abs(np.array(np.array([train_data_set.X, train_data_set.Y])) > 1.)):
-            raise RuntimeError('Expected dataset must be in range [-1; 1]')
+        if np.any(np.abs(train_data_set.X) > 1.):
+            raise RuntimeError('Expected dataset Input must be in range [-1; 1]')
+
+        if np.any(np.abs(train_data_set.Y) > 1.):
+            raise RuntimeError('Expected dataset Output must be in range [-1; 1]')
 
         inputs_with_bias = self.__create_input_with_biases(train_data_set)
 

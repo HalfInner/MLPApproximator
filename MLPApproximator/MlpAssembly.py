@@ -3,6 +3,8 @@
 import argparse
 from fractions import Fraction
 
+import numpy as np
+
 from MLPApproximator.MlpActivationFunction import TanhActivationFunction, SigmoidActivationFunction, \
     ReLUActivationFunction, LinearActivationFunction
 from MLPApproximator.MlpApproximatorBuilder import MlpApproximatorBuilder
@@ -38,7 +40,7 @@ class MlpApproximatorAssembler:
                             help='Number of neurons on hidden layer. Default 3.')
 
         parser.add_argument('-b', '--use_biases', dest='UseBiases', action='store',
-                            default=True, type=self.__str2bool, nargs='?',choices=[True, False],
+                            default=True, type=self.__str2bool, nargs='?', choices=[True, False],
                             help='Activate normalization over data set into range [0,1]. Default True.')
 
         parser.add_argument('-e', '--epoch_number', dest='EpochNumber', action='store',
@@ -72,10 +74,12 @@ class MlpApproximatorAssembler:
                                  'Each row is separated by new line(\'\\n\'). '
                                  'One column is interpreted as one input or one output.'
                                  '\'1 2 3 4 5\' in second line means that first two columns colums are the input, '
-                                 'and last two are the expected output')
+                                 'and last two are the expected output'
+                                 '\'#\' character threat as comment'
+                                 'Using file as input excludes usage of function generator')
 
         parser.add_argument('-norm', '--normalize_set', dest='NormalizeSet', action='store',
-                            default=True, type=self.__str2bool, nargs='?',choices=[True, False],
+                            default=True, type=self.__str2bool, nargs='?', choices=[True, False],
                             help='Activate normalization over data set into range [0,1]. '
                                  'Data set must be provided first Default True.')
 
@@ -105,7 +109,7 @@ class MlpApproximatorAssembler:
                             help='Print Raw Results to console. Default False')
 
         parser.add_argument('-plot', dest='PlotOn', action='store',
-                            default=True, type=self.__str2bool, nargs='?',choices=[True, False],
+                            default=True, type=self.__str2bool, nargs='?', choices=[True, False],
                             help='Generates learning charts after work. Default True')
 
         parser.add_argument('-plot_to_dir', dest='PlotToDir', action='store', default=None,
@@ -128,20 +132,14 @@ class MlpApproximatorAssembler:
         if args.PlotToDir is not None:
             save_to_file = True
             dir_name = self.__mlp_utils.create_date_folder_if_not_exists(args.PlotToDir)
-
-        self.__add_function_to_generator(args.f_1)
-        self.__add_function_to_generator(args.f_2)
-        self.__add_function_to_generator(args.f_3)
-
-        training_function_generator = FunctionGenerator()
-        for function in self.__training_functions:
-            training_function_generator.addFunction(function)
-
-        required_samples = args.SampleNumber
-        training_set = training_function_generator.generate(required_samples)
-
         ratio = args.Ratio
-        input_number = output_number = self.__input_number
+
+        input_number, output_number, required_samples, training_set = None, None, None, None
+        if not args.DataSetFile:
+            input_number, output_number, required_samples, training_set = self.__generate_functions(args)
+        else:
+            input_number, output_number, required_samples, training_set = self.__parse_data_set_file(args.DataSetFile)
+
         fitting_set_x, fitting_set_y, testing_set_x, testing_set_y = self.__mlp_utils.split_data_set(
             input_number, output_number, ratio, required_samples, training_set)
 
@@ -191,6 +189,55 @@ class MlpApproximatorAssembler:
 
         return MlpApproximatorAssembler.EXIT_OK
 
+    def __generate_functions(self, args):
+        self.__add_function_to_generator(args.f_1)
+        self.__add_function_to_generator(args.f_2)
+        self.__add_function_to_generator(args.f_3)
+        training_function_generator = FunctionGenerator()
+        for function in self.__training_functions:
+            training_function_generator.addFunction(function)
+        required_samples = args.SampleNumber
+        training_set = training_function_generator.generate(required_samples)
+        input_number = output_number = self.__input_number
+        return input_number, output_number, required_samples, training_set
+
+    def __parse_data_set_file(self, file_handler):
+        input_number, output_number = 0, 0
+        required_samples = 0
+        training_set = None
+        is_header_read = False
+        is_data_read = False
+        input_data = None
+        output_data = None
+
+        for line in file_handler:
+            if not line:
+                continue
+
+            elements = line.replace('\t', ' ').split(' ')
+            is_comment = elements[0].lstrip()[0] == '#'
+            if is_comment:
+                continue
+
+            if not is_header_read:
+                if len(elements) != 2:
+                    raise RuntimeError('Header must contains number of inputs and outputs')
+                input_number = int(elements[0])
+                output_number = int(elements[1])
+
+                input_data = np.empty((0, input_number), dtype=float)
+                output_data = np.empty((0, output_number), dtype=float)
+
+                is_header_read = True
+                continue
+
+            input_data = np.append(input_data, [elements[:input_number]], axis=0)
+            output_data = np.append(output_data, [elements[input_number:]], axis=0)
+            required_samples += 1
+
+        testing_set = TestingSet([input_data.astype('float64'), output_data.astype('float64')])
+        return input_number, output_number, required_samples, testing_set
+
     def __add_function_to_generator(self, f):
         f_is_exists = f is not None and f
         if not f_is_exists:
@@ -201,6 +248,7 @@ class MlpApproximatorAssembler:
         self.__input_number += 1
 
     def __str2bool(self, v):
+        # TODO(kaj): common convention is use --function/--no-function instead of parsing booleans
         # https://stackoverflow.com/questions/15008758/parsing-boolean-values-with-argparse
         if isinstance(v, bool):
             return v

@@ -22,11 +22,11 @@ class MlpUtils:
             minimum_required_ratio = 1
             raise ValueError('Ratio must be great or equal to {}'.format(minimum_required_ratio))
 
-        if len(training_set.X.T[0]) != input_number:
+        if len(training_set.X[0]) != input_number:
             raise ValueError('Input number={} and data set input number={} must be equal'.format(
                 input_number, len(training_set.X.T[0])))
 
-        if len(training_set.Y.T[0]) != output_number:
+        if len(training_set.Y[0]) != output_number:
             raise ValueError('Output number={} and data set output number={} must be equal'.format(
                 output_number, len(training_set.Y.T[0])))
 
@@ -36,11 +36,11 @@ class MlpUtils:
         testing_set_y = np.empty((0, input_number))
         for idx in range(required_samples):
             if idx % ratio:
-                fitting_set_x = np.append(fitting_set_x, np.array([training_set.X.T[idx]]), axis=0)
-                fitting_set_y = np.append(fitting_set_y, np.array([training_set.Y.T[idx]]), axis=0)
+                fitting_set_x = np.append(fitting_set_x, np.array([training_set.X[idx]]), axis=0)
+                fitting_set_y = np.append(fitting_set_y, np.array([training_set.Y[idx]]), axis=0)
             else:
-                testing_set_x = np.append(testing_set_x, np.array([training_set.X.T[idx]]), axis=0)
-                testing_set_y = np.append(testing_set_y, np.array([training_set.Y.T[idx]]), axis=0)
+                testing_set_x = np.append(testing_set_x, np.array([training_set.X[idx]]), axis=0)
+                testing_set_y = np.append(testing_set_y, np.array([training_set.Y[idx]]), axis=0)
         return fitting_set_x, fitting_set_y, testing_set_x, testing_set_y
 
     def plot_testing_approximation(self, dir_name, plot_name, testing_set_x, testing_set_y,
