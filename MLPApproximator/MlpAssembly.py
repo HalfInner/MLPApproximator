@@ -38,7 +38,7 @@ class MlpApproximatorAssembler:
                             help='Number of neurons on hidden layer. Default 3.')
 
         parser.add_argument('-b', '--use_biases', dest='UseBiases', action='store',
-                            default=True, type=self.__str2bool, nargs='?',
+                            default=True, type=self.__str2bool, nargs='?',choices=[True, False],
                             help='Activate normalization over data set into range [0,1]. Default True.')
 
         parser.add_argument('-e', '--epoch_number', dest='EpochNumber', action='store',
@@ -51,7 +51,7 @@ class MlpApproximatorAssembler:
 
         parser.add_argument('-r', '--ratio', dest='Ratio', action='store',
                             default=5, type=int,
-                            help='Set ratio of splitting dataset. Threat each r sample sa test set. Default 5 (1:4).')
+                            help='Set ratio of splitting dataset. Threat each r-th sample sa test set. Default 5 (1:4)')
 
         parser.add_argument('-hf', '--hidden_layer_activation_function',
                             choices=['tanh', 'sigmoid', 'relu', 'linear'],
@@ -75,7 +75,7 @@ class MlpApproximatorAssembler:
                                  'and last two are the expected output')
 
         parser.add_argument('-norm', '--normalize_set', dest='NormalizeSet', action='store',
-                            default=True, type=self.__str2bool, nargs='?',
+                            default=True, type=self.__str2bool, nargs='?',choices=[True, False],
                             help='Activate normalization over data set into range [0,1]. '
                                  'Data set must be provided first Default True.')
 
@@ -101,15 +101,15 @@ class MlpApproximatorAssembler:
                             help='Activate Verbose Logging During Test. Default False')
 
         parser.add_argument('-print_raw', dest='PrintRawOn', action='store',
-                            default=False, type=self.__str2bool, nargs='?',
+                            default=False, choices=[True, False], type=self.__str2bool, nargs='?',
                             help='Print Raw Results to console. Default False')
 
         parser.add_argument('-plot', dest='PlotOn', action='store',
-                            default=True, type=self.__str2bool, nargs='?',
+                            default=True, type=self.__str2bool, nargs='?',choices=[True, False],
                             help='Generates learning charts after work. Default True')
 
-        parser.add_argument('-plot_to_file', dest='PlotToFile', action='store', default=None,
-                            type=argparse.FileType('r'),
+        parser.add_argument('-plot_to_dir', dest='PlotToDir', action='store', default=None,
+                            type=str,  # TODO (kaj) : add directory validation
                             help='Generates learning charts after work to destination'
                                  '\'-plot\' must be set to True. Default None')
 
@@ -118,15 +118,16 @@ class MlpApproximatorAssembler:
         self.__parser = parser
         self.__training_functions = []
         self.__input_number = 0
+        self.__mlp_utils = MlpUtils()
 
     def run(self, argv) -> int:
         args, unknown = self.__parser.parse_known_args(argv)
 
-        to_file = False
-        file_name = None
-        if args.PlotToFile is not None:
-            to_file = True
-            file_name = args.PlotToFile
+        save_to_file = False
+        dir_name = None
+        if args.PlotToDir is not None:
+            save_to_file = True
+            dir_name = self.__mlp_utils.create_date_folder_if_not_exists(args.PlotToDir)
 
         self.__add_function_to_generator(args.f_1)
         self.__add_function_to_generator(args.f_2)
@@ -141,8 +142,7 @@ class MlpApproximatorAssembler:
 
         ratio = args.Ratio
         input_number = output_number = self.__input_number
-        mlp_utils = MlpUtils()
-        fitting_set_x, fitting_set_y, testing_set_x, testing_set_y = mlp_utils.split_data_set(
+        fitting_set_x, fitting_set_y, testing_set_x, testing_set_y = self.__mlp_utils.split_data_set(
             input_number, output_number, ratio, required_samples, training_set)
 
         activation_function_map = {
@@ -175,15 +175,13 @@ class MlpApproximatorAssembler:
 
         tested_output, loss = mlp_approximator.test(TestingSet([testing_set_x, testing_set_y]))
 
-        plot_name = '{:>3}: M={} Hidden={} Epochs={}'.format(
-            1, 3, hidden_layer_number, epoch_number)
-
         if args.PlotOn:
-            mlp_utils.plot_rmse(epoch_number, file_name, metrics, plot_name, to_file)
-            mlp_utils.plot_learning_approximation(
-                file_name, fitting_set_x, fitting_set_y, learned_outputs, metrics, plot_name, to_file)
-            mlp_utils.plot_testing_approximation(
-                file_name, plot_name, testing_set_x, testing_set_y, tested_output, loss, to_file)
+            plot_name = '{:>3}: M={} Hidden={} Epochs={}'.format(1, 3, hidden_layer_number, epoch_number)
+            self.__mlp_utils.plot_rmse(epoch_number, dir_name, metrics, plot_name, save_to_file)
+            self.__mlp_utils.plot_learning_approximation(
+                dir_name, fitting_set_x, fitting_set_y, learned_outputs, metrics, plot_name, save_to_file)
+            self.__mlp_utils.plot_testing_approximation(
+                dir_name, plot_name, testing_set_x, testing_set_y, tested_output, loss, save_to_file)
 
         if args.PrintRawOn:
             print('Learned output\n', learned_outputs)

@@ -12,6 +12,7 @@ class MlpUtils:
         """
 
         :param input_number:
+        :param output_number:
         :param ratio:
         :param required_samples:
         :param training_set:
@@ -42,16 +43,16 @@ class MlpUtils:
                 testing_set_y = np.append(testing_set_y, np.array([training_set.Y.T[idx]]), axis=0)
         return fitting_set_x, fitting_set_y, testing_set_x, testing_set_y
 
-    def plot_testing_approximation(self, file_name, plot_name, testing_set_x, testing_set_y,
+    def plot_testing_approximation(self, dir_name, plot_name, testing_set_x, testing_set_y,
                                    test_outputs, loss, save_to_file):
         """
 
         :param test_outputs:
-        :param file_name:
-        :param mlp_approximator:
+        :param dir_name:
         :param plot_name:
         :param testing_set_x:
         :param testing_set_y:
+        :param loss:
         :param save_to_file:
         """
 
@@ -62,17 +63,17 @@ class MlpUtils:
         plt.xlabel('TEST ' + plot_name + ' {:2.3}%'.format(np.mean(loss) * 100))
         plt.ylim(-0.1, 1.1)
         plt.legend()
-        if save_to_file:
-            plt.savefig('{}_TEST_ACC.png'.format(file_name))
+        if dir_name:
+            plt.savefig('{}_TEST_ACC.png'.format(dir_name))
             plt.cla()
         else:
             plt.show()
 
-    def plot_learning_approximation(self, file_name, fitting_set_x, fitting_set_y, learned_outputs, metrics,
+    def plot_learning_approximation(self, dir_name, fitting_set_x, fitting_set_y, learned_outputs, metrics,
                                     plot_name, save_to_file):
         """
 
-        :param file_name:
+        :param dir_name:
         :param fitting_set_x:
         :param fitting_set_y:
         :param learned_outputs:
@@ -90,17 +91,17 @@ class MlpUtils:
 
         plt.ylim(-0.1, 1.1)
         plt.legend()
-        if save_to_file:
-            plt.savefig('{}_FIT_ACC.png'.format(file_name))
+        if dir_name:
+            plt.savefig('{}_FIT_ACC.png'.format(dir_name))
             plt.cla()
         else:
             plt.show()
 
-    def plot_rmse(self, epoch_number, file_name, metrics, plot_name, save_to_file):
+    def plot_rmse(self, epoch_number, dir_name, metrics, plot_name, save_to_file):
         """
 
         :param epoch_number:
-        :param file_name:
+        :param dir_name:
         :param metrics:
         :param plot_name:
         :param save_to_file:
@@ -114,21 +115,24 @@ class MlpUtils:
         plt.xlabel('FIT ' + plot_name)
         plt.ylim(0, np.max(metrics.MeanSquaredErrors) * 1.1)
         plt.legend()
-        if save_to_file:
-            plt.savefig('{}_FIT_MSE.png'.format(file_name))
+        if dir_name:
+            plt.savefig('{}_FIT_MSE.png'.format(dir_name))
             plt.cla()
         else:
             plt.show()
         return plot_name
 
-    def create_date_folder_if_not_exists(self, base_directory='..\\TestResults\\'):
+    def create_date_folder_if_not_exists(self, base_directory='..\\TestResults'):
         """
 
         :return:
         """
+        if base_directory is None:
+            base_directory = '.'
+
         today = datetime.now()
         folder_name = today.strftime('%Y%m%H%M')
-        directory = base_directory + folder_name + '\\'
+        directory = base_directory + '\\' + folder_name + '\\'
         if not os.path.exists(directory):
             os.makedirs(directory)
         return directory
