@@ -2,6 +2,7 @@
 #  Kajetan Brzuszczak
 import argparse
 from fractions import Fraction
+from matplotlib import pyplot as plt
 
 import numpy as np
 
@@ -32,8 +33,12 @@ class MlpApproximatorAssembler:
 
     def __init__(self):
         parser = argparse.ArgumentParser(
-            description='MLP Neural Network Function Approximation.\n'
-                        'E.g. usage:\n\tpython %(prog)s -arg_f1 1/2 -arg_f1 2 -arg_f1 0 -arg_f2 3 -arg_f1 2 -arg_f3 1')
+            description='MLP Neural Network Function Approximator.\n'
+                        'E.g. usage:'
+                        '\n\tpython %(prog)s -arg_f1 1/2 -arg_f1 2 -arg_f1 0 -arg_f2 3 -arg_f1 2 -arg_f3 1'
+                        '\n\t%(prog)s -ds Examples/DataSetM5.txt -norm False -plot_to_dir Result -e 100 -n 10',
+            epilog='© 2020 Kajetan Brzuszczak',
+            formatter_class=argparse.RawTextHelpFormatter)
 
         parser.add_argument('-n', '--hidden_layer_neurons', dest='HiddenLayerNeurons', action='store',
                             default=3, type=int,
@@ -70,7 +75,8 @@ class MlpApproximatorAssembler:
                             type=argparse.FileType('r'),
                             help='First line is a header with metadata. Determine number of input and number of output'
                                  '\'2 3\' in first line. Means that there is 4 inputs and 4 outputs'
-                                 'Parser accepts text file where each column is separated by whitespace(' '). '
+                                 'Parser accepts text file where each column is separated by whitespace(\' \') '
+                                 'or tabulation(\'\\t\'). '
                                  'Each row is separated by new line(\'\\n\'). '
                                  'One column is interpreted as one input or one output.'
                                  '\'1 2 3 4 5\' in second line means that first two columns colums are the input, '
@@ -173,6 +179,12 @@ class MlpApproximatorAssembler:
 
         tested_output, loss = mlp_approximator.test(TestingSet([testing_set_x, testing_set_y]))
 
+        if args.PrintRawOn:
+            print('Learned output\n', learned_outputs)
+            print('Metrics\n', metrics.MeanSquaredErrors)
+            print('Tested output\n', learned_outputs)
+            print('Tested Loss\n', loss)
+
         if args.PlotOn:
             plot_name = '{:>3}: M={} Hidden={} Epochs={}'.format(1, 3, hidden_layer_number, epoch_number)
             self.__mlp_utils.plot_rmse(epoch_number, dir_name, metrics, plot_name, save_to_file)
@@ -180,12 +192,6 @@ class MlpApproximatorAssembler:
                 dir_name, fitting_set_x, fitting_set_y, learned_outputs, metrics, plot_name, save_to_file)
             self.__mlp_utils.plot_testing_approximation(
                 dir_name, plot_name, testing_set_x, testing_set_y, tested_output, loss, save_to_file)
-
-        if args.PrintRawOn:
-            print('Learned output\n', learned_outputs)
-            print('Metrics\n', metrics.MeanSquaredErrors)
-            print('Tested output\n', learned_outputs)
-            print('Tested Loss\n', loss)
 
         return MlpApproximatorAssembler.EXIT_OK
 

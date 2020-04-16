@@ -120,6 +120,7 @@ class MlpUtils:
             plt.cla()
         else:
             plt.show()
+
         return plot_name
 
     def create_date_folder_if_not_exists(self, base_directory='..\\TestResults'):
