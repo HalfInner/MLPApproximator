@@ -224,7 +224,7 @@ class MlpApproximatorAssembler:
             if not line:
                 continue
 
-            elements = line.strip().replace('\t', ' ').split(' ')
+            elements = line.strip().replace(',', '.').replace('\t', ' ').split(' ')
             is_comment = elements[0].lstrip()[0] == '#'
             if is_comment:
                 continue

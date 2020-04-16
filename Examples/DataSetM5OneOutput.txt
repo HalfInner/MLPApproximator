@@ -1,4 +1,4 @@
-# Data Set of three post-normalized functions
+# Data Set of three pre-normalized functions
 # F1 = -7x4 + 21x3 – 8x + 24
 # F2 =-20x^4 + 2
 # F3 = 3x^4 - 4x^2 + 4x^2

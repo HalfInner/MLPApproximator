@@ -64,15 +64,11 @@ class Perceptron:
         :param expected_out:
         :return:
         """
-        # if not expected_out.shape == self.__output_data.shape:
-        #     raise ValueError("Shape of validator must be same as the output")
 
         self.__debug('ExpectedOut=\n{}'.format(expected_out))
         self.__debug('Out=\n{}'.format(self.__output_data))
         diff = expected_out - self.__output_data
-        # mean_squared_error = np.sqrt(np.mean(0.5 * np.square(diff), axis=0, keepdims=True)).T
 
-        # self.__calculateCorrectionAndWeights(diff * 2)
         empiric_scalar = 0.5
         self.__calculateCorrectionAndWeights(empiric_scalar * diff)
 

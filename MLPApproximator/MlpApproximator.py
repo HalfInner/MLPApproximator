@@ -96,8 +96,8 @@ class MlpApproximator:
 
         self.__debug('\tTraining Time={:2.3}s\n'.format(timer() - training_time_start))
         if self.__debug__level_2_on:
-            self.__debug('\tCurrent denormalized output=\n{}\n'.format(self.__p2.output()))
-        # self.__output = self.__denormalize_output(self.__p2.output())
+            self.__debug('\tCurrent output=\n{}\n'.format(self.__p2.output()))
+
         self.__output = self.__p2.output()
         return self.__output, metrics
 
