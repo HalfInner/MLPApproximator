@@ -73,15 +73,11 @@ class MlpUtils:
         :param to_file:
         """
 
-        plt.plot(fitting_set_x.T[0], fitting_set_y.T[0], 'b-', label='F1 Expected')
-        plt.plot(fitting_set_x.T[0], learned_outputs.T[0], 'y-',
-                 label='F1 Predicted {:2.3}%'.format(metrics.MeanSquaredErrors[0][-1] * 100))
-        plt.plot(fitting_set_x.T[1], fitting_set_y.T[1], 'g-', label='F2 Expected')
-        plt.plot(fitting_set_x.T[1], learned_outputs.T[1], 'r-',
-                 label='F2 Predicted {:2.3}%'.format(metrics.MeanSquaredErrors[1][-1] * 100))
-        plt.plot(fitting_set_x.T[2], fitting_set_y.T[2], 'k-', label='F3 Expected')
-        plt.plot(fitting_set_x.T[2], learned_outputs.T[2], 'm-',
-                 label='F2 Predicted {:2.3}%'.format(metrics.MeanSquaredErrors[2][-1] * 100))
+        for idx, learn_output in enumerate(learned_outputs.T):
+            plt.plot(fitting_set_x.T[idx], fitting_set_y.T[idx], '-', label='F{} Expected'.format(idx))
+            plt.plot(fitting_set_x.T[idx], learn_output, '-',
+                     label='F{} Predicted {:2.3}%'.format(idx, metrics.MeanSquaredErrors[idx][-1] * 100))
+
         plt.xlabel('FIT ' + plot_name + ' {:2.3}%'.format(np.mean(metrics.AvgMeanSquaredError) * 100))
 
         plt.ylim(-0.1, 1.1)
