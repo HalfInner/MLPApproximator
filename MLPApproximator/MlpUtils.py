@@ -31,37 +31,33 @@ class MlpUtils:
         return fitting_set_x, fitting_set_y, testing_set_x, testing_set_y
 
     def plot_testing_approximation(self, file_name, plot_name, testing_set_x, testing_set_y,
-                                   test_output, loss, to_file):
+                                   test_outputs, loss, save_to_file):
         """
 
-        :param test_output:
+        :param test_outputs:
         :param file_name:
         :param mlp_approximator:
         :param plot_name:
         :param testing_set_x:
         :param testing_set_y:
-        :param to_file:
+        :param save_to_file:
         """
-        plt.plot(testing_set_x.T[0], testing_set_y.T[0], 'b-', label='F1 Expected')
-        plt.plot(testing_set_x.T[0], test_output.T[0], 'y-',
-                 label='F1 Predicted {:2.3}%'.format(loss[0][0] * 100))
-        plt.plot(testing_set_x.T[1], testing_set_y.T[1], 'g-', label='F2 Expected')
-        plt.plot(testing_set_x.T[1], test_output.T[1], 'r-',
-                 label='F2 Predicted {:2.3}%'.format(loss[1][0] * 100))
-        plt.plot(testing_set_x.T[2], testing_set_y.T[2], 'k-', label='F3 Expected')
-        plt.plot(testing_set_x.T[2], test_output.T[2], 'm-',
-                 label='F3 Predicted {:2.3}%'.format(loss[2][0] * 100))
+
+        for idx, test_output in enumerate(test_outputs.T):
+            plt.plot(testing_set_x.T[idx], testing_set_y.T[idx], '-', label='F{} Expected'.format(idx))
+            plt.plot(testing_set_x.T[idx], test_output, '-',
+                     label='F{} Predicted {:2.3}%'.format(idx, loss[idx][0] * 100))
         plt.xlabel('TEST ' + plot_name + ' {:2.3}%'.format(np.mean(loss) * 100))
         plt.ylim(-0.1, 1.1)
         plt.legend()
-        if to_file:
+        if save_to_file:
             plt.savefig('{}_TEST_ACC.png'.format(file_name))
             plt.cla()
         else:
             plt.show()
 
     def plot_learning_approximation(self, file_name, fitting_set_x, fitting_set_y, learned_outputs, metrics,
-                                    plot_name, to_file):
+                                    plot_name, save_to_file):
         """
 
         :param file_name:
@@ -70,7 +66,7 @@ class MlpUtils:
         :param learned_outputs:
         :param metrics:
         :param plot_name:
-        :param to_file:
+        :param save_to_file:
         """
 
         for idx, learn_output in enumerate(learned_outputs.T):
@@ -82,32 +78,31 @@ class MlpUtils:
 
         plt.ylim(-0.1, 1.1)
         plt.legend()
-        if to_file:
+        if save_to_file:
             plt.savefig('{}_FIT_ACC.png'.format(file_name))
             plt.cla()
         else:
             plt.show()
 
-    def plot_rmse(self,  epoch_number, file_name, metrics, plot_name, to_file):
+    def plot_rmse(self, epoch_number, file_name, metrics, plot_name, save_to_file):
         """
 
         :param epoch_number:
         :param file_name:
         :param metrics:
         :param plot_name:
-        :param to_file:
+        :param save_to_file:
         :return:
         """
         for idx, mse in enumerate(metrics.MeanSquaredErrors):
-            plt.plot(np.ascontiguousarray(np.arange(epoch_number)), mse, '-',
-                     label='F{} RMSE'.format(idx))
+            plt.plot(np.ascontiguousarray(np.arange(epoch_number)), mse, '-', label='F{} RMSE'.format(idx))
 
         plt.plot(np.ascontiguousarray(np.arange(epoch_number)), metrics.AvgMeanSquaredError, 'r-',
                  label='Avg RMSE')
         plt.xlabel('FIT ' + plot_name)
         plt.ylim(0, np.max(metrics.MeanSquaredErrors) * 1.1)
         plt.legend()
-        if to_file:
+        if save_to_file:
             plt.savefig('{}_FIT_MSE.png'.format(file_name))
             plt.cla()
         else:
