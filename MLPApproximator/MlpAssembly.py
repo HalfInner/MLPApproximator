@@ -40,10 +40,6 @@ class MlpApproximatorAssembler:
             epilog='© 2020 Kajetan Brzuszczak',
             formatter_class=argparse.RawTextHelpFormatter)
 
-        parser.add_argument('-n', '--hidden_layer_neurons', dest='HiddenLayerNeurons', action='store',
-                            default=3, type=int,
-                            help='Number of neurons on hidden layer. Default 3.')
-
         parser.add_argument('-b', '--use_biases', dest='UseBiases', action='store',
                             default=True, type=self.__str2bool, nargs='?', choices=[True, False],
                             help='Activate normalization over data set into range [0,1]. Default True.')
@@ -80,21 +76,19 @@ class MlpApproximatorAssembler:
                                  'One column is interpreted as one input or one output.'
                                  '\'1 2 3 4 5\' in second line means that first two columns colums are the input, '
                                  'and last two are the expected output. The \'\'#\' character threat as comment'
-                                 'Using file as input excludes usage of function generator')
-
-        parser.add_argument('-norm', '--normalize_set', dest='NormalizeSet', action='store',
-                            default=True, type=self.__str2bool, nargs='?', choices=[True, False],
-                            help='Activate normalization over data set into range [0,1]. '
-                                 'Data set must be provided first Default True.')
+                                 'Using file as input excludes usage of function generator. '
+                                 'Data must be normalized before otherwise it terminates itself immediately. ')
 
         parser.add_argument('-arg_f1', '--arguments_function_1', dest='f_1', action='append',
                             default=[],
                             help='Generate function. Polynomials Representation. Each number represent one of factors. '
                                  'Counting from right to left. To avoid factor, use 0. Generate one output')
+
         parser.add_argument('-arg_f2', '--arguments_function_2', dest='f_2', action='append',
                             default=[],
                             help='Generate function. Polynomials Representation. Each number represent one of factor. '
                                  'Counting from right to left. To avoid factor, use 0. Generate one output')
+
         parser.add_argument('-arg_f3', '--arguments_function_3', dest='f_3', action='append',
                             default=[],
                             help='Generate function. Polynomials Representation. Each number represent one of factor. '
