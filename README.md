@@ -47,10 +47,34 @@ Say what the step will be
 Give the example
 ```
 
-And repeat
+### Example output
 
 ```
-until finished
+$> python MLPApproximatorConsoleUI.py -ds Examples/DataSetM5.txt -e 10
+Approximator:   MLP Function Approximator
+Approximator:   input number=3
+Approximator:  output number=3
+Approximator:  hidden number=3
+Approximator:  Train on 82 samples
+Approximator:  Epoch:    1/10
+Approximator:   Epoch Time=0.0684s GlobalTime=0.0684s Loss=15.6%
+
+Approximator:  Epoch:    2/10
+Approximator:   Epoch Time=0.0408s GlobalTime=0.109s Loss=15.6%
+
+(...)
+
+Approximator:  Epoch:    9/10
+Approximator:   Epoch Time=0.0731s GlobalTime=0.498s Loss=15.6%
+
+Approximator:  Epoch:   10/10
+Approximator:   Epoch Time=0.057s GlobalTime=0.555s Loss=15.6%
+
+Approximator:   Training Time=0.555s
+
+Approximator:  Testing:
+Approximator:   Loss=15.8%
+
 ```
 
 End with an example of getting some data out of the system or using it for a little demo
