@@ -11,7 +11,7 @@ def main(argv):
     for m_parameter in (3, 5, 7):
         result = []
         [result.append(parse_file(open(f, 'r'))) for f in glob.glob('{}/M{}*.txt'.format(directory, m_parameter))]
-        print(format(result))
+        print(format(result).replace('.', ','))
 
     return 0
 
@@ -19,7 +19,6 @@ def main(argv):
 def format(result):
     epoch_array = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]
     data_out = ''
-    epoch_idx = 1
     result = sorted(result, key=lambda tup: (tup[0], tup[1]))
     previous = -1
     for m, i, loss in result:
@@ -32,7 +31,6 @@ def format(result):
 
     header = '\nGAP ' + ' '.join(map(str, epoch_array))
     return header + data_out
-
 
 
 def parse_file(file_handler):
@@ -70,14 +68,16 @@ def usage():
         """
             Welcome into result parser for MLP Approximator.
             usage: 
-                python MlpResultParser <result_directory>
+                python MlpResultParser <directory_with_results>
             
-            Result of parsing is write on standard output. Where you can easly use it in excel
+            Result of parsing is write on standard output. Where you can easily use it in excel.
+            It postprocess the result of command:
+                python -m unittest MLPApproximatorTexst.test_integration.TestIntegration 
             
             Format: 
-            Name of file M -> M Parameter
-            Read only lines where Approximator is line prefix.
-            Read: {hidden layer number, test loss
+                Name of file M -> M Parameter
+                Read only lines where Approximator is line prefix.
+                Read: {hidden layer number, epoch number, test loss} 
             
             Prototype! No validation!
         """)
