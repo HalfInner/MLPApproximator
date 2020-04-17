@@ -54,7 +54,7 @@ Approximator:   Loss=15.8%
 Whole research is included into integration test. The result are saves into 'TestResults' folder. 
 It takes around 1h per group. 3 groups exist.
 ```
-python -m unittest MLPApproximatorTexst.test_integration.TestIntegration
+python -m unittest MLPApproximatorTest.test_integration.TestIntegration
 ```
 
 ## Author
