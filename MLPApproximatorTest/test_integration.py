@@ -1,7 +1,6 @@
 #  Copyright (c) 2020
 #  Kajetan Brzuszczak
 from contextlib import redirect_stdout
-from datetime import date
 from itertools import product
 from unittest import TestCase
 

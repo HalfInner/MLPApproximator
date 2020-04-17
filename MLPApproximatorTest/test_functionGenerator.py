@@ -32,8 +32,8 @@ class TestFunctionGenerator(TestCase):
         testing_set = function_generator.generate()
 
         first_function_index = 0
-        self.assertEqual([-1], testing_set.X[first_function_index])
-        self.assertEqual([0.5], testing_set.Y[first_function_index])
+        self.assertEqual([-1], testing_set.X.T[first_function_index])
+        self.assertEqual([0.5], testing_set.Y.T[first_function_index])
 
     def test_generateOneSampleDoubleFunction(self):
         function_generator = FunctionGenerator()
@@ -44,12 +44,12 @@ class TestFunctionGenerator(TestCase):
 
         first_sample_indxe = 0
         first_function_index = 0
-        self.assertAlmostEqual(-1., testing_set.X[first_function_index][first_sample_indxe])
-        self.assertAlmostEqual(0.5, testing_set.Y[first_function_index][first_sample_indxe])
+        self.assertAlmostEqual(-1., testing_set.X.T[first_function_index][first_sample_indxe])
+        self.assertAlmostEqual(0., testing_set.Y.T[first_function_index][first_sample_indxe])
 
         second_function_index = 1
-        self.assertAlmostEqual(0., testing_set.X[second_function_index][first_sample_indxe])
-        self.assertAlmostEqual(0.5, testing_set.Y[second_function_index][first_sample_indxe])
+        self.assertAlmostEqual(-1., testing_set.X.T[second_function_index][first_sample_indxe])
+        self.assertAlmostEqual(1., testing_set.Y.T[second_function_index][first_sample_indxe])
 
     def test_generateTripleSampleTripleFunction(self):
         function_generator = FunctionGenerator()
@@ -63,7 +63,9 @@ class TestFunctionGenerator(TestCase):
         testing_set = function_generator.generate(sample_number)
 
         for function_idx in range(function_number):
-            self.assertTrue(np.all(np.array([0, 0.5, 1] == testing_set.Y[function_idx])))
+            self.assertAlmostEqual(0., testing_set.Y.T[function_idx][0])
+            self.assertAlmostEqual(.5, testing_set.Y.T[function_idx][1])
+            self.assertAlmostEqual(1., testing_set.Y.T[function_idx][2])
 
     def test_generate100ContinuousSamples(self):
         function_generator = FunctionGenerator()
@@ -75,4 +77,4 @@ class TestFunctionGenerator(TestCase):
 
         first_function_idx = 0
         for sample_idx in range(sample_number):
-            self.assertAlmostEqual(sample_idx/sample_number, testing_set.Y[first_function_idx][sample_idx], delta=0.011)
+            self.assertAlmostEqual(sample_idx/sample_number, testing_set.Y.T[first_function_idx][sample_idx], delta=0.011)
