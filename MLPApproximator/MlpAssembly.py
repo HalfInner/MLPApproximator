@@ -57,11 +57,11 @@ class MlpApproximatorAssembler:
                             dest='HiddenLayerFunction',
                             type=str,
                             default='tanh',
-                            help='Activate normalization over data set into range [0,1]. Default True.')
+                            help='Set activation function to hidden layer. Default sigmoid.')
 
         parser.add_argument('-of', '--output_layer_activation_function', dest='OutputLayerFunction',
                             default='sigmoid', choices=['tanh', 'sigmoid', 'relu', 'linear'],
-                            help='Activate normalization over data set into range [0,1]. Default True.')
+                            help='Set activation function to output layer. Default sigmoid.')
 
         parser.add_argument('-ds', '--data_set', dest='DataSetFileHandler', action='store', default=None,
                             type=argparse.FileType('r'),
